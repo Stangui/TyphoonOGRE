@@ -1,6 +1,4 @@
-
-#ifndef _Demo_GameEntityManager_H_
-#define _Demo_GameEntityManager_H_
+#pragma once 
 
 #include "Threading/MessageQueueSystem.h"
 #include "GameEntity.h"
@@ -12,26 +10,29 @@ namespace TyphoonEngine
 
     class GameEntityManager
     {
-    public:
+    
+	public:
+
         struct CreatedGameEntity
         {
-            GameEntity          *gameEntity;
-            GameEntityTransform initialTransform;
+            GameEntity*			m_gameEntity;
+            GameEntityTransform m_initialTransform;
         };
 
         typedef std::vector<GameEntityVec> GameEntityVecVec;
 
     private:
+
         struct Region
         {
-            size_t slotOffset;
-            size_t count;
-            size_t bufferIdx;
+            size_t m_slotOffset;
+            size_t m_count;
+            size_t m_bufferIdx;
 
             Region( size_t _slotOffset, size_t _count, size_t _bufferIdx ) :
-                slotOffset( _slotOffset ),
-                count( _count ),
-                bufferIdx( _bufferIdx )
+                 m_slotOffset( _slotOffset )
+                ,m_count( _count )
+                ,m_bufferIdx( _bufferIdx )
             {
             }
         };
@@ -47,8 +48,8 @@ namespace TyphoonEngine
         size_t              mScheduledForRemovalCurrentSlot;
         std::vector<size_t> mScheduledForRemovalAvailableSlots;
 
-        Mq::MessageQueueSystem  *mGraphicsSystem;
-        LogicSystem             *mLogicSystem;
+        Mq::MessageQueueSystem*	mGraphicsSystem;
+        LogicSystem*			mLogicSystem;
 
         Ogre::uint32 getScheduledForRemovalAvailableSlot(void);
         void destroyAllGameEntitiesIn( GameEntityVec &container );
@@ -57,8 +58,8 @@ namespace TyphoonEngine
         void releaseTransformSlot( size_t bufferIdx, GameEntityTransform *transform );
 
     public:
-        GameEntityManager( Mq::MessageQueueSystem *graphicsSystem,
-                           LogicSystem *logicSystem );
+
+        GameEntityManager( Mq::MessageQueueSystem *graphicsSystem, LogicSystem *logicSystem );
         ~GameEntityManager();
 
         /** Creates a GameEntity, adding it to the world, and scheduling for the Graphics
@@ -78,7 +79,7 @@ namespace TyphoonEngine
             not all of its pointers may filled yet (the ones that are not meant to
             be used by the logic thread)
         */
-        GameEntity* addGameEntity( Ogre::SceneMemoryMgrTypes type,
+        GameEntity* AddGameEntity( Ogre::SceneMemoryMgrTypes type,
                                    const MovableObjectDefinition *moDefinition,
                                    const Ogre::Vector3 &initialPos,
                                    const Ogre::Quaternion &initialRot,
@@ -89,14 +90,12 @@ namespace TyphoonEngine
             It will be destroyed after the Render thread confirms it is done with it
             (via a Mq::GAME_ENTITY_SCHEDULED_FOR_REMOVAL_SLOT message)
         */
-        void removeGameEntity( GameEntity *toRemove );
+        void RemoveGameEntity( GameEntity* toRemove );
 
         /// Must be called by LogicSystem when Mq::GAME_ENTITY_SCHEDULED_FOR_REMOVAL_SLOT message arrives
         void _notifyGameEntitiesRemoved( size_t slot );
 
         /// Must be called every frame from the LOGIC THREAD.
-        void finishFrameParallel(void);
+        void FinishFrameParallel(void);
     };
 }
-
-#endif

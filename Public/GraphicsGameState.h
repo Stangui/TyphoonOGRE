@@ -1,26 +1,33 @@
 #pragma once
 
+#include "GameState.h"
 #include "OgrePrerequisites.h"
-#include "TyphoonGameState.h"
 
 namespace TyphoonEngine
 {
 	class GraphicsSystem;
 
-	class GraphicsGameState : public TyphoonGameState
+	class GraphicsGameState : public IGameState
 	{
 	
 	private:
 
-		bool        mEnableInterpolation;
-
-		virtual void generateDebugText( float timeSinceLast, Ogre::String &outText );
+		GraphicsSystem* mGraphicsSystem;
 
 	public:
+
 		GraphicsGameState( const Ogre::String &helpDescription );
+		virtual ~GraphicsGameState() override {};
 
-		virtual void update( float timeSinceLast );
-
+		virtual void Initialise() override {}
+		virtual void Deinitialise() override {}
+		virtual void CreateScene() override {}
+		virtual void DestroyScene() override {}
+		virtual void FinishFrame() override {}
+		virtual void FinishFrameParallel() override {}
+		virtual void Update( float timeSinceLast ) override;
+		inline virtual void SetGraphicSystem( GraphicsSystem* sys ) { mGraphicsSystem = sys; }
+		
 		virtual void keyReleased( const SDL_KeyboardEvent &arg );
 	};
 }

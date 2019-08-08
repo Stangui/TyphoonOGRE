@@ -23,7 +23,7 @@ namespace TyphoonEngine
     //-----------------------------------------------------------------------------------
     void CameraController::update( float timeSinceLast )
     {
-        Ogre::Camera *camera = mGraphicsSystem->getCamera();
+        Ogre::Camera *camera = mGraphicsSystem->GetCamera();
 
         if( mCameraYaw || mCameraPitch )
         {
@@ -52,7 +52,7 @@ namespace TyphoonEngine
 
         if( camMovementZ || camMovementX || slideUpDown )
         {
-            Ogre::Vector3 camMovementDir( camMovementX, slideUpDown, camMovementZ );
+            Ogre::Vector3 camMovementDir( static_cast<float>( camMovementX ), static_cast< float >( slideUpDown ), static_cast< float >( camMovementZ ) );
             camMovementDir.normalise();
             camMovementDir *= timeSinceLast * mCameraBaseSpeed * (1 + mSpeedMofifier * mCameraSpeedBoost);
 
@@ -116,8 +116,8 @@ namespace TyphoonEngine
     //-----------------------------------------------------------------------------------
     void CameraController::mouseMoved( const SDL_Event &arg )
     {
-        float width  = static_cast<float>( mGraphicsSystem->getRenderWindow()->getWidth() );
-        float height = static_cast<float>( mGraphicsSystem->getRenderWindow()->getHeight() );
+        float width  = static_cast<float>( mGraphicsSystem->GetRenderWindow()->getWidth() );
+        float height = static_cast<float>( mGraphicsSystem->GetRenderWindow()->getHeight() );
 
         mCameraYaw   += -arg.motion.xrel / width;
         mCameraPitch += -arg.motion.yrel / height;

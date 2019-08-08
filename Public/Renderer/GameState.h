@@ -4,21 +4,25 @@
 
 namespace TyphoonEngine
 {
-    class GameState : public MouseListener, public KeyboardListener, public JoystickListener
+
+	/**
+	* Game state interface
+	*/
+    class IGameState : public MouseListener, public KeyboardListener, public JoystickListener
     {
     public:
-        virtual ~GameState() {}
+        
+		virtual ~IGameState() {}
 
-        virtual void initialize(void) {}
-        virtual void deinitialize(void) {}
+		virtual void Initialise( void ) = 0;
+		virtual void Deinitialise( void ) = 0;
 
-        virtual void createScene01(void) {}
-        virtual void createScene02(void) {}
+		virtual void CreateScene( void ) = 0;
+		virtual void DestroyScene( void ) = 0;
 
-        virtual void destroyScene(void) {}
+		virtual void Update( float timeSinceLast ) = 0;
+		virtual void FinishFrameParallel( void ) = 0;
+		virtual void FinishFrame( void ) = 0;
 
-        virtual void update( float timeSinceLast ) {}
-        virtual void finishFrameParallel(void) {}
-        virtual void finishFrame(void) {}
     };
 }

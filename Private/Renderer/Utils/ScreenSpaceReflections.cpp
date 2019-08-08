@@ -39,7 +39,6 @@ namespace TyphoonEngine
         pass = material->getTechnique(0)->getPass(0);
         mPsParams[1] = pass->getFragmentProgramParameters();
 
-        //pass->getTextureUnitState( "globalCubemap" )->setTexture( globalCubemap );
         mRsDepthRange = renderSystem->getRSDepthRange();
     }
     //-----------------------------------------------------------------------------------
@@ -194,8 +193,8 @@ namespace TyphoonEngine
         zThicknessBiasStart         *= equivalentMetersInCurrentUnit;
         zThicknessBiasEnd           *= equivalentMetersInCurrentUnit;
         zThicknessBiasAmount        *= equivalentMetersInCurrentUnit;
-        maxDistance                 *= equivalentMetersInCurrentUnit;
-        reprojectionMaxDistanceError*= equivalentMetersInCurrentUnit;
+        maxDistance                 *= static_cast<float>( equivalentMetersInCurrentUnit );
+        reprojectionMaxDistanceError*= static_cast< float >( equivalentMetersInCurrentUnit );
 
         Ogre::MaterialPtr material = Ogre::MaterialManager::getSingleton().load(
                     "SSR/ScreenSpaceReflectionsVectors",

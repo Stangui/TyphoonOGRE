@@ -3,7 +3,7 @@
 //sdlinputwrapper files as base under the MIT license
 #pragma once 
 
-#include "BaseSystem.h"
+#include "BaseGameSystem.h"
 #include "OgrePrerequisites.h"
 #include "SdlEmulationLayer.h"
 
@@ -21,8 +21,8 @@ namespace TyphoonEngine
     {
         SDL_Window  *mSdlWindow;
 
-        BaseSystem          *mGraphicsSystem;
-        BaseSystem          *mLogicSystem;
+        BaseGameSystem      *mGraphicsSystem;
+        BaseGameSystem      *mLogicSystem;
         MouseListener       *mMouseListener;
         KeyboardListener    *mKeyboardListener;
         JoystickListener    *mJoystickListener;

@@ -1,35 +1,47 @@
 #pragma once 
 
 #include "OgrePrerequisites.h"
-#include "TyphoonGameState.h"
+#include "SDL_events.h"
 
 namespace TyphoonEngine
 {
-    class CameraController
-    {
-        bool                mUseSceneNode;
+	class GraphicsSystem;
 
-        bool                mSpeedMofifier;
-        bool                mWASD[4];
-        bool                mSlideUpDown[2];
-        float               mCameraYaw;
-        float               mCameraPitch;
-        public: float       mCameraBaseSpeed;
-        public: float       mCameraSpeedBoost;
+	/**
+	* Basic WASD camera controller
+	*/
+	class CameraController
+	{
 
-    private:
-        GraphicsSystem      *mGraphicsSystem;
+	private:
 
-    public:
-        CameraController( GraphicsSystem *graphicsSystem, bool useSceneNode=false );
+		bool        mUseSceneNode;
+		bool        mSpeedMofifier;
+		bool        mWASD[ 4 ];
+		bool        mSlideUpDown[ 2 ];
+		float       mCameraYaw;
+		float       mCameraPitch;
+	
+	public: 
+		
+		float       mCameraBaseSpeed;
+		float       mCameraSpeedBoost;
 
-        void update( float timeSinceLast );
+	private:
 
-        /// Returns true if we've handled the event
-        bool keyPressed( const SDL_KeyboardEvent &arg );
-        /// Returns true if we've handled the event
-        bool keyReleased( const SDL_KeyboardEvent &arg );
+		GraphicsSystem*	mGraphicsSystem;
 
-        void mouseMoved( const SDL_Event &arg );
-    };
+	public:
+		
+		CameraController( GraphicsSystem *graphicsSystem, bool useSceneNode = false );
+
+		void update( float timeSinceLast );
+
+		/// Returns true if we've handled the event
+		bool keyPressed( const SDL_KeyboardEvent &arg );
+		/// Returns true if we've handled the event
+		bool keyReleased( const SDL_KeyboardEvent &arg );
+
+		void mouseMoved( const SDL_Event &arg );
+	};
 }

@@ -9,7 +9,6 @@
 // See the multithreading tutorial for a better explanation
 //---------------------------------------------------------------------------------------
 
-#include "TyphoonApp.h"
 #include "GraphicsSystem.h"
 #include "LogicSystem.h"
 #include "GraphicsGameState.h"
@@ -24,7 +23,7 @@
 #include "Threading/OgreBarrier.h"
 
 extern const double cFrametime;
-const double cFrametime = 1.0 / 25.0;
+const double cFrametime = 1.0 / 30.0;
 
 unsigned long renderThread( Ogre::ThreadHandle *threadHandle );
 unsigned long gameThread( Ogre::ThreadHandle *threadHandle );
@@ -35,9 +34,9 @@ namespace TyphoonEngine
 {
 	struct ThreadData
 	{
-		GraphicsSystem  *graphicsSystem;
-		LogicSystem     *logicSystem;
-		Ogre::Barrier   *barrier;
+		GraphicsSystem*	graphicsSystem;
+		LogicSystem*	logicSystem;
+		Ogre::Barrier*	barrier;
 	};
 
 /*	class StereoGraphicsSystem : public GraphicsSystem
@@ -167,43 +166,28 @@ namespace TyphoonEngine
 	*/
 }
 
+using namespace TyphoonEngine;
+
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
 INT WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPrevInstance, LPSTR strCmdLine, INT nCmdShow )
 #else
 int mainApp( int argc, const char *argv[] )
 #endif
 {
-	TyphoonEngine::GraphicsGameState graphicsGameState(
-		"This tutorial shows how to setup two update loops: One for Graphics, another for\n"
-		"Logic, each in its own thread. We don't render anything because we will now need\n"
-		"to do a robust synchronization for creating, destroying and updating Entities,\n"
-		"which is too complex to show in just one tutorial step.\n"
-		"\n"
-		"The key concept is that Graphic's createScene01 runs in parallel to Logic's\n"
-		"createScene01. But we guarantee that createScene02 will be called after all\n"
-		"createScene01s have been called. In other words, createScene is divided in\n"
-		"two stages and each stage runs in parallel.\n"
-		"\n"
-		"This means that Logic will be creating the entities in stage 01; and Graphics\n"
-		"will see the request to create the Ogre objects (e.g. Item, SceneNode) in\n"
-		"stage 02. Meanwhile Graphics may dedicate the time in stage 01 to preload some\n"
-		"meshes, overlays, and other resources that will always be needed.\n"
-		"Logic in stage 02 will be idle, so it may dedicate that time to load non-\n"
-		"graphics related data (like physics representations).\n" );
-	TyphoonEngine::GraphicsSystem graphicsSystem( &graphicsGameState );
-	TyphoonEngine::LogicGameState logicGameState; //Dummy
-	TyphoonEngine::LogicSystem logicSystem( &logicGameState );
+	GraphicsGameState graphicsGameState( "Basic Multithreaded App" );
+	GraphicsSystem graphicsSystem( &graphicsGameState );
+	LogicGameState logicGameState;
+	LogicSystem logicSystem( &logicGameState );
 	Ogre::Barrier barrier( 2 );
 
-	graphicsGameState._notifyGraphicsSystem( &graphicsSystem );
-	logicGameState._notifyLogicSystem( &logicSystem );
+	graphicsGameState.SetGraphicSystem( &graphicsSystem );
+	logicSystem.SetGraphicSystem( &graphicsSystem );
+	graphicsSystem.SetLogicSystem( &logicSystem );
+	logicGameState.SetLogicSystem( &logicSystem );
 
-	graphicsSystem._notifyLogicSystem( &logicSystem );
-	logicSystem._notifyGraphicsSystem( &graphicsSystem );
+	GameEntityManager gameEntityManager( &graphicsSystem, &logicSystem );
 
-	TyphoonEngine::GameEntityManager gameEntityManager( &graphicsSystem, &logicSystem );
-
-	TyphoonEngine::ThreadData threadData;
+	ThreadData threadData;
 	threadData.graphicsSystem = &graphicsSystem;
 	threadData.logicSystem = &logicSystem;
 	threadData.barrier = &barrier;
@@ -217,7 +201,6 @@ int mainApp( int argc, const char *argv[] )
 	return 0;
 }
 
-using namespace TyphoonEngine;
 
 //---------------------------------------------------------------------
 unsigned long renderThreadApp( Ogre::ThreadHandle *threadHandle )
@@ -226,34 +209,31 @@ unsigned long renderThreadApp( Ogre::ThreadHandle *threadHandle )
 	GraphicsSystem *graphicsSystem = threadData->graphicsSystem;
 	Ogre::Barrier *barrier = threadData->barrier;
 
-	graphicsSystem->initialize( "Tutorial 06: Multithreading" );
+	graphicsSystem->Initialise();
 	barrier->sync();
 
-	if ( graphicsSystem->getQuit() )
+	if ( graphicsSystem->GetQuit() )
 	{
-		graphicsSystem->deinitialize();
+		graphicsSystem->Deinitialise();
 		return 0; //User cancelled config
 	}
 
-	graphicsSystem->createScene01();
+	graphicsSystem->CreateScene();
 	barrier->sync();
 
-	graphicsSystem->createScene02();
-	barrier->sync();
-
-	Ogre::RenderWindow *renderWindow = graphicsSystem->getRenderWindow();
+	Ogre::RenderWindow *renderWindow = graphicsSystem->GetRenderWindow();
 
 	Ogre::Timer timer;
 
 	Ogre::uint64 startTime = timer.getMicroseconds();
 
-	double timeSinceLast = 1.0 / 60.0;
+	double timeSinceLast = 1.0 / 120.0;
 
-	while ( !graphicsSystem->getQuit() )
+	while ( !graphicsSystem->GetQuit() )
 	{
-		graphicsSystem->beginFrameParallel();
-		graphicsSystem->update( timeSinceLast );
-		graphicsSystem->finishFrameParallel();
+		graphicsSystem->BeginFrameParallel();
+		graphicsSystem->Update( static_cast<float>(timeSinceLast) );
+		graphicsSystem->FinishFrameParallel();
 
 		if ( !renderWindow->isVisible() )
 		{
@@ -269,14 +249,16 @@ unsigned long renderThreadApp( Ogre::ThreadHandle *threadHandle )
 
 	barrier->sync();
 
-	graphicsSystem->destroyScene();
+	graphicsSystem->DestroyScene();
 	barrier->sync();
 
-	graphicsSystem->deinitialize();
+	graphicsSystem->Deinitialise();
 	barrier->sync();
 
 	return 0;
 }
+
+//---------------------------------------------------------------------
 unsigned long renderThread( Ogre::ThreadHandle *threadHandle )
 {
 	unsigned long retVal = -1;
@@ -300,6 +282,7 @@ unsigned long renderThread( Ogre::ThreadHandle *threadHandle )
 
 	return retVal;
 }
+
 //---------------------------------------------------------------------
 unsigned long gameThread( Ogre::ThreadHandle *threadHandle )
 {
@@ -308,52 +291,49 @@ unsigned long gameThread( Ogre::ThreadHandle *threadHandle )
 	LogicSystem *logicSystem = threadData->logicSystem;
 	Ogre::Barrier *barrier = threadData->barrier;
 
-	logicSystem->initialize();
+	logicSystem->Initialise();
 	barrier->sync();
 
-	if ( graphicsSystem->getQuit() )
+	if ( graphicsSystem->GetQuit() )
 	{
-		logicSystem->deinitialize();
+		logicSystem->Deinitialise();
 		return 0; //Render thread cancelled early
 	}
 
-	logicSystem->createScene01();
+	logicSystem->CreateScene();
 	barrier->sync();
-
-	logicSystem->createScene02();
-	barrier->sync();
-
-	Ogre::RenderWindow *renderWindow = graphicsSystem->getRenderWindow();
+	
+	Ogre::RenderWindow *renderWindow = graphicsSystem->GetRenderWindow();
 
 	Ogre::Timer timer;
 	YieldTimer yieldTimer( &timer );
 
 	Ogre::uint64 startTime = timer.getMicroseconds();
 
-	while ( !graphicsSystem->getQuit() )
+	while ( !graphicsSystem->GetQuit() )
 	{
-		logicSystem->beginFrameParallel();
-		logicSystem->update( static_cast< float >( cFrametime ) );
-		logicSystem->finishFrameParallel();
+		logicSystem->BeginFrameParallel();
+		logicSystem->Update( static_cast< float >( cFrametime ) );
+		logicSystem->FinishFrameParallel();
 
-		logicSystem->finishFrame();
+		logicSystem->FinishFrame();
 
 		if ( !renderWindow->isVisible() )
 		{
 			//Don't burn CPU cycles unnecessary when we're minimized.
 			Ogre::Threads::Sleep( 500 );
 		}
-
+		
 		//YieldTimer will wait until the current time is greater than startTime + cFrametime
 		startTime = yieldTimer.yield( cFrametime, startTime );
 	}
 
 	barrier->sync();
 
-	logicSystem->destroyScene();
+	logicSystem->DestroyScene();
 	barrier->sync();
 
-	logicSystem->deinitialize();
+	logicSystem->Deinitialise();
 	barrier->sync();
 
 	return 0;

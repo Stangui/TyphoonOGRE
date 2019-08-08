@@ -78,7 +78,7 @@ namespace TyphoonEngine
                         wrapMousePointer( evt.motion );
 
                     if( mLogicSystem )
-                        mGraphicsSystem->queueSendMessage( mLogicSystem, Mq::SDL_EVENT, evt );
+                        mGraphicsSystem->QueueSendMessage( mLogicSystem, Mq::SDL_EVENT, evt );
                 }
                 break;
             case SDL_MOUSEWHEEL:
@@ -87,7 +87,7 @@ namespace TyphoonEngine
                         mMouseListener->mouseMoved( evt );
 
                     if( mLogicSystem )
-                        mGraphicsSystem->queueSendMessage( mLogicSystem, Mq::SDL_EVENT, evt );
+                        mGraphicsSystem->QueueSendMessage( mLogicSystem, Mq::SDL_EVENT, evt );
                 }
                 break;
             case SDL_MOUSEBUTTONDOWN:
@@ -96,7 +96,7 @@ namespace TyphoonEngine
                         mMouseListener->mousePressed( evt.button, evt.button.button );
 
                     if( mLogicSystem )
-                        mGraphicsSystem->queueSendMessage( mLogicSystem, Mq::SDL_EVENT, evt );
+                        mGraphicsSystem->QueueSendMessage( mLogicSystem, Mq::SDL_EVENT, evt );
                 }
                 break;
             case SDL_MOUSEBUTTONUP:
@@ -105,7 +105,7 @@ namespace TyphoonEngine
                         mMouseListener->mouseReleased( evt.button, evt.button.button );
 
                     if( mLogicSystem )
-                        mGraphicsSystem->queueSendMessage( mLogicSystem, Mq::SDL_EVENT, evt );
+                        mGraphicsSystem->QueueSendMessage( mLogicSystem, Mq::SDL_EVENT, evt );
                 }
                 break;
             case SDL_KEYDOWN:
@@ -114,7 +114,7 @@ namespace TyphoonEngine
                         mKeyboardListener->keyPressed( evt.key );
 
                     if( mLogicSystem )
-                        mGraphicsSystem->queueSendMessage( mLogicSystem, Mq::SDL_EVENT, evt );
+                        mGraphicsSystem->QueueSendMessage( mLogicSystem, Mq::SDL_EVENT, evt );
                 }
                 break;
             case SDL_KEYUP:
@@ -123,7 +123,7 @@ namespace TyphoonEngine
                         mKeyboardListener->keyReleased( evt.key );
 
                     if( mLogicSystem )
-                        mGraphicsSystem->queueSendMessage( mLogicSystem, Mq::SDL_EVENT, evt );
+                        mGraphicsSystem->QueueSendMessage( mLogicSystem, Mq::SDL_EVENT, evt );
                 }
                 break;
             case SDL_TEXTINPUT:
@@ -132,7 +132,7 @@ namespace TyphoonEngine
                         mKeyboardListener->textInput( evt.text );
 
                     if( mLogicSystem )
-                        mGraphicsSystem->queueSendMessage( mLogicSystem, Mq::SDL_EVENT, evt );
+                        mGraphicsSystem->QueueSendMessage( mLogicSystem, Mq::SDL_EVENT, evt );
                 }
                 break;
             case SDL_JOYAXISMOTION:
@@ -141,7 +141,7 @@ namespace TyphoonEngine
                         mJoystickListener->joyAxisMoved( evt.jaxis, evt.jaxis.axis );
 
                     if( mLogicSystem )
-                        mGraphicsSystem->queueSendMessage( mLogicSystem, Mq::SDL_EVENT, evt );
+                        mGraphicsSystem->QueueSendMessage( mLogicSystem, Mq::SDL_EVENT, evt );
                 }
                 break;
             case SDL_JOYBUTTONDOWN:
@@ -150,7 +150,7 @@ namespace TyphoonEngine
                         mJoystickListener->joyButtonPressed( evt.jbutton, evt.jbutton.button );
 
                     if( mLogicSystem )
-                        mGraphicsSystem->queueSendMessage( mLogicSystem, Mq::SDL_EVENT, evt );
+                        mGraphicsSystem->QueueSendMessage( mLogicSystem, Mq::SDL_EVENT, evt );
                 }
                 break;
             case SDL_JOYBUTTONUP:
@@ -159,22 +159,16 @@ namespace TyphoonEngine
                         mJoystickListener->joyButtonReleased( evt.jbutton, evt.jbutton.button );
 
                     if( mLogicSystem )
-                        mGraphicsSystem->queueSendMessage( mLogicSystem, Mq::SDL_EVENT, evt );
+                        mGraphicsSystem->QueueSendMessage( mLogicSystem, Mq::SDL_EVENT, evt );
                 }
                 break;
             case SDL_JOYDEVICEADDED:
-                //SDL_JoystickOpen(evt.jdevice.which);
-                //std::cout << "Detected a new joystick: " << SDL_JoystickNameForIndex(evt.jdevice.which) << std::endl;
                 break;
             case SDL_JOYDEVICEREMOVED:
-                //std::cout << "A joystick has been removed" << std::endl;
                 break;
             case SDL_WINDOWEVENT:
                 handleWindowEvent(evt);
                 break;
-            /*default:
-                std::cerr << "Unhandled SDL event of type " << evt.type << std::endl;
-                break;*/
         }
     }
     //-----------------------------------------------------------------------------------

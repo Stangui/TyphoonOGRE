@@ -1,7 +1,7 @@
 #pragma once
 
 #include "OgrePrerequisites.h"
-#include "TyphoonGameState.h"
+#include "GameState.h"
 
 namespace TyphoonEngine
 {
@@ -9,21 +9,27 @@ namespace TyphoonEngine
 	struct GameEntity;
 	struct MovableObjectDefinition;
 
-	class LogicGameState : public GameState
+	class LogicGameState : public IGameState
 	{
-		float               mDisplacement;
-		GameEntity              *mCubeEntity;
-		MovableObjectDefinition *mCubeMoDef;
-
-		LogicSystem         *mLogicSystem;
+		float						mDisplacement;
+		GameEntity*					mCubeEntity;
+		MovableObjectDefinition*	mCubeMoDef;
+		LogicSystem*				mLogicSystem;
 
 	public:
+
 		LogicGameState();
-		~LogicGameState();
+		virtual ~LogicGameState() override;
 
-		void _notifyLogicSystem( LogicSystem *logicSystem ) { mLogicSystem = logicSystem; }
+		void Initialise() override {};
+		void Deinitialise() override {};
+		virtual void DestroyScene() override {}
+		virtual void FinishFrame() override {}
+		virtual void FinishFrameParallel() override {}
 
-		virtual void createScene01( void ) override;
-		virtual void update( float timeSinceLast ) override;
+		inline void SetLogicSystem( LogicSystem* logicSystem ) { mLogicSystem = logicSystem; }
+
+		virtual void CreateScene( void ) override;
+		virtual void Update( float timeSinceLast ) override;
 	};
 }

@@ -5,10 +5,7 @@
 
 #include "OgreRoot.h"
 #include "Compositor/OgreCompositorManager2.h"
-//#include "Compositor/OgreCompositorWorkspace.h"
-//#include "Compositor/OgreCompositorNode.h"
 #include "Compositor/OgreCompositorNodeDef.h"
-//#include "Compositor/Pass/PassClear/OgreCompositorPassClear.h"
 #include "Compositor/Pass/PassClear/OgreCompositorPassClearDef.h"
 
 #include "OgreMaterialManager.h"
@@ -53,24 +50,6 @@ namespace TyphoonEngine
     void HdrUtils::setSkyColour( const Ogre::ColourValue &colour,
                                  float multiplier )
     {
-        /*Ogre::CompositorNode *node = workspace->findNode( "HdrRenderingNode" );
-
-        if( !node )
-        {
-            OGRE_EXCEPT( Ogre::Exception::ERR_INVALIDPARAMS,
-                         "No node 'HdrRenderingNode' in provided workspace ",
-                         "HdrUtils::setSkyColour" );
-        }
-
-        const Ogre::CompositorPassVec passes = node->_getPasses();
-
-        assert( passes.size() >= 1 );
-        Ogre::CompositorPass *pass = passes[0];
-
-        assert( pass->getType() == Ogre::PASS_CLEAR &&
-                dynamic_cast<Ogre::CompositorPassClear*>(pass) );
-
-        Ogre::CompositorPassClear *passClear = static_cast<Ogre::CompositorPassClear*>( pass );*/
         Ogre::CompositorManager2 *compositorManager = Ogre::Root::getSingleton().getCompositorManager2();
         Ogre::CompositorNodeDef *nodeDef =
                 compositorManager->getNodeDefinitionNonConst( "HdrRenderingNode" );

@@ -15,12 +15,12 @@ namespace TyphoonEngine
         mGraphicsSystem( graphicsSystem ),
         mLogicSystem( logicSystem )
     {
-        mLogicSystem->_notifyGameEntityManager( this );
+        mLogicSystem->SetGameEntityManager( this );
     }
     //-----------------------------------------------------------------------------------
     GameEntityManager::~GameEntityManager()
     {
-        mLogicSystem->_notifyGameEntityManager( 0 );
+        mLogicSystem->SetGameEntityManager( nullptr );
 
         {
             GameEntityVecVec::iterator itor = mScheduledForRemoval.begin();
@@ -47,7 +47,7 @@ namespace TyphoonEngine
         mAvailableTransforms.clear();
     }
     //-----------------------------------------------------------------------------------
-    GameEntity* GameEntityManager::addGameEntity( Ogre::SceneMemoryMgrTypes type,
+    GameEntity* GameEntityManager::AddGameEntity( Ogre::SceneMemoryMgrTypes type,
                                                   const MovableObjectDefinition *moDefinition,
                                                   const Ogre::Vector3 &initialPos,
                                                   const Ogre::Quaternion &initialRot,
@@ -56,10 +56,10 @@ namespace TyphoonEngine
         GameEntity *gameEntity = new GameEntity( mCurrentId++, moDefinition, type );
 
         CreatedGameEntity cge;
-        cge.gameEntity  = gameEntity;
-        cge.initialTransform.vPos   = initialPos;
-        cge.initialTransform.qRot   = initialRot;
-        cge.initialTransform.vScale = initialScale;
+        cge.m_gameEntity  = gameEntity;
+        cge.m_initialTransform.vPos   = initialPos;
+        cge.m_initialTransform.qRot   = initialRot;
+        cge.m_initialTransform.vScale = initialScale;
 
         size_t slot, bufferIdx;
         aquireTransformSlot( slot, bufferIdx );
@@ -68,17 +68,16 @@ namespace TyphoonEngine
         for( int i=0; i<NUM_GAME_ENTITY_BUFFERS; ++i )
         {
             gameEntity->mTransform[i] = mTransformBuffers[bufferIdx] + slot + cNumTransforms * i;
-            memcpy( gameEntity->mTransform[i], &cge.initialTransform, sizeof(GameEntityTransform) );
+            memcpy( gameEntity->mTransform[i], &cge.m_initialTransform, sizeof(GameEntityTransform) );
         }
 
         mGameEntities[type].push_back( gameEntity );
-
-        mLogicSystem->queueSendMessage( mGraphicsSystem, Mq::GAME_ENTITY_ADDED, cge );
+        mLogicSystem->QueueSendMessage( mGraphicsSystem, Mq::GAME_ENTITY_ADDED, cge );
 
         return gameEntity;
     }
     //-----------------------------------------------------------------------------------
-    void GameEntityManager::removeGameEntity( GameEntity *toRemove )
+    void GameEntityManager::RemoveGameEntity( GameEntity *toRemove )
     {
         Ogre::uint32 slot = getScheduledForRemovalAvailableSlot();
         mScheduledForRemoval[slot].push_back( toRemove );
@@ -87,7 +86,7 @@ namespace TyphoonEngine
                                                          toRemove, GameEntity::OrderById );
         assert( itor != mGameEntities[toRemove->mType].end() && *itor == toRemove );
         mGameEntities[toRemove->mType].erase( itor );
-        mLogicSystem->queueSendMessage( mGraphicsSystem, Mq::GAME_ENTITY_REMOVED, toRemove );
+        mLogicSystem->QueueSendMessage( mGraphicsSystem, Mq::GAME_ENTITY_REMOVED, toRemove );
     }
     //-----------------------------------------------------------------------------------
     void GameEntityManager::_notifyGameEntitiesRemoved( size_t slot )
@@ -123,11 +122,11 @@ namespace TyphoonEngine
         }
 
         Region &region = mAvailableTransforms.back();
-        outSlot = region.slotOffset++;
-        --region.count;
-        outBufferIdx = region.bufferIdx;
+        outSlot = region.m_slotOffset++;
+        --region.m_count;
+        outBufferIdx = region.m_bufferIdx;
 
-        if( region.count == 0 )
+        if( region.m_count == 0 )
             mAvailableTransforms.pop_back();
     }
     //-----------------------------------------------------------------------------------
@@ -143,8 +142,8 @@ namespace TyphoonEngine
 
         while( itor != end )
         {
-            if( itor->bufferIdx == bufferIdx &&
-                ( itor->slotOffset == slot + 1 || slot == itor->slotOffset + itor->count ) )
+            if( itor->m_bufferIdx == bufferIdx &&
+                ( itor->m_slotOffset == slot + 1 || slot == itor->m_slotOffset + itor->m_count ) )
             {
                 break;
             }
@@ -154,10 +153,10 @@ namespace TyphoonEngine
 
         if( itor != end )
         {
-            if( itor->slotOffset == slot + 1 )
-                --itor->slotOffset;
+            if( itor->m_slotOffset == slot + 1 )
+                --itor->m_slotOffset;
             else //if( slot == itor->slot + itor->count )
-                ++itor->count;
+                ++itor->m_count;
         }
         else
         {
@@ -174,21 +173,19 @@ namespace TyphoonEngine
                 mScheduledForRemovalAvailableSlots.push_back( mScheduledForRemoval.size() );
                 mScheduledForRemoval.push_back( GameEntityVec() );
             }
-
-            mScheduledForRemovalCurrentSlot = mScheduledForRemovalAvailableSlots.back();
+			
+			mScheduledForRemovalCurrentSlot = mScheduledForRemovalAvailableSlots.back();
             mScheduledForRemovalAvailableSlots.pop_back();
         }
 
-        return mScheduledForRemovalCurrentSlot;
+        return static_cast<Ogre::uint32>(mScheduledForRemovalCurrentSlot);
     }
     //-----------------------------------------------------------------------------------
-    void GameEntityManager::finishFrameParallel(void)
+    void GameEntityManager::FinishFrameParallel(void)
     {
         if( mScheduledForRemovalCurrentSlot < mScheduledForRemoval.size() )
         {
-            mLogicSystem->queueSendMessage( mGraphicsSystem, Mq::GAME_ENTITY_SCHEDULED_FOR_REMOVAL_SLOT,
-                                            mScheduledForRemovalCurrentSlot );
-
+            mLogicSystem->QueueSendMessage( mGraphicsSystem, Mq::GAME_ENTITY_SCHEDULED_FOR_REMOVAL_SLOT, mScheduledForRemovalCurrentSlot );
             mScheduledForRemovalCurrentSlot = (size_t)-1;
         }
     }

@@ -32,6 +32,7 @@ namespace TyphoonEngine
 
     struct GameEntity
     {
+
     private:
         Ogre::uint32 mId;
 
@@ -39,8 +40,8 @@ namespace TyphoonEngine
         //----------------------------------------
         // Only used by Graphics thread
         //----------------------------------------
-        Ogre::SceneNode         *mSceneNode;
-        Ogre::MovableObject     *mMovableObject; //Could be Entity, InstancedEntity, Item.
+        Ogre::SceneNode*			mSceneNode;
+        Ogre::MovableObject*		mMovableObject; //Could be Entity, InstancedEntity, Item.
 
         //Your custom pointers go here, i.e. physics representation.
         //used only by Logic thread (hkpEntity, btRigidBody, etc)
@@ -48,29 +49,31 @@ namespace TyphoonEngine
         //----------------------------------------
         // Used by both Logic and Graphics threads
         //----------------------------------------
-        GameEntityTransform     *mTransform[NUM_GAME_ENTITY_BUFFERS];
-        Ogre::SceneMemoryMgrTypes       mType;
+        GameEntityTransform*		mTransform[NUM_GAME_ENTITY_BUFFERS];
+        Ogre::SceneMemoryMgrTypes   mType;
 
         //----------------------------------------
         // Read-only
         //----------------------------------------
-        MovableObjectDefinition const   *mMoDefinition;
-        size_t                   mTransformBufferIdx;
+        MovableObjectDefinition const*	mMoDefinition;
+        size_t							mTransformBufferIdx;
 
-        GameEntity( Ogre::uint32 id, const MovableObjectDefinition *moDefinition,
-                    Ogre::SceneMemoryMgrTypes type ) :
-            mId( id ),
-            mSceneNode( 0 ),
-            mMovableObject( 0 ),
-            mType( type ),
-            mMoDefinition( moDefinition ),
-            mTransformBufferIdx( 0 )
+        GameEntity( Ogre::uint32 id, const MovableObjectDefinition *moDefinition, Ogre::SceneMemoryMgrTypes type ) : 
+			 mId( id )
+			,mSceneNode( nullptr )
+            ,mMovableObject( nullptr )
+            ,mType( type )
+            ,mMoDefinition( moDefinition )
+            ,mTransformBufferIdx( 0 )
         {
             for( int i=0; i<NUM_GAME_ENTITY_BUFFERS; ++i )
-                mTransform[i] = 0;
+                mTransform[i] = nullptr;
         }
 
-        Ogre::uint32 getId(void) const          { return mId; }
+        inline Ogre::uint32 getId(void) const          
+		{ 
+			return mId; 
+		}
 
         bool operator < ( const GameEntity *_r ) const
         {

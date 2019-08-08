@@ -86,7 +86,7 @@ namespace TyphoonEngine
             shaderParams.mParams.push_back( p );
             ShaderParams::Param *param = &shaderParams.mParams.back();
 
-            param->setManualValue( &weights[i], std::min<uint32>( floatsPerParam, weights.size() - i ) );
+            param->setManualValue( &weights[i], std::min<uint32>( floatsPerParam, static_cast< Ogre::uint32 >( weights.size() - i ) ) );
         }
 
         shaderParams.setDirty();

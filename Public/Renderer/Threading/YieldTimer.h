@@ -1,6 +1,4 @@
-
-#ifndef _Demo_YieldTimer_H_
-#define _Demo_YieldTimer_H_
+#pragma once 
 
 #include "OgreTimer.h"
 
@@ -8,11 +6,14 @@ namespace TyphoonEngine
 {
     class YieldTimer
     {
-        Ogre::Timer *mExternalTimer;
+
+	private:
+        
+		Ogre::Timer *mExternalTimer;
 
     public:
-        YieldTimer( Ogre::Timer *externalTimer ) :
-            mExternalTimer( externalTimer )
+
+        YieldTimer( Ogre::Timer *externalTimer ) : mExternalTimer( externalTimer )
         {
         }
 
@@ -36,4 +37,3 @@ namespace TyphoonEngine
     };
 }
 
-#endif

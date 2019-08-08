@@ -1,34 +1,34 @@
 #pragma once 
 
-#include "BaseSystem.h"
+#include "BaseGameSystem.h"
 #include "OgrePrerequisites.h"
 
 namespace TyphoonEngine
 {
     class GameEntityManager;
 
-    class LogicSystem : public BaseSystem
+    class LogicSystem : public BaseGameSystem
     {
     protected:
-        BaseSystem          *mGraphicsSystem;
-        GameEntityManager   *mGameEntityManager;
+        BaseGameSystem*				mGraphicsSystem;
+        GameEntityManager*			mGameEntityManager;
 
         Ogre::uint32                mCurrentTransformIdx;
         std::deque<Ogre::uint32>    mAvailableTransformIdx;
 
         /// @see MessageQueueSystem::processIncomingMessage
-        virtual void processIncomingMessage( Mq::MessageId messageId, const void *data );
+        virtual void ProcessIncomingMessage( Mq::MessageId messageId, const void *data ) override;
 
     public:
-        LogicSystem( GameState *gameState );
+        LogicSystem( IGameState *gameState );
         virtual ~LogicSystem();
 
-        void _notifyGraphicsSystem( BaseSystem *graphicsSystem )    { mGraphicsSystem = graphicsSystem; }
-        void _notifyGameEntityManager( GameEntityManager *mgr )     { mGameEntityManager = mgr; }
+		inline void SetGraphicSystem( BaseGameSystem *graphicsSystem )		{ mGraphicsSystem = graphicsSystem; }
+		inline void SetGameEntityManager( GameEntityManager *mgr )			{ mGameEntityManager = mgr; }
 
-        void finishFrameParallel(void);
+        void FinishFrameParallel(void) override;
 
-        GameEntityManager* getGameEntityManager(void)               { return mGameEntityManager; }
-        Ogre::uint32 getCurrentTransformIdx(void) const             { return mCurrentTransformIdx; }
+        inline GameEntityManager* GetGameEntityManager(void)               { return mGameEntityManager; }
+        inline Ogre::uint32 GetCurrentTransformIdx(void) const             { return mCurrentTransformIdx; }
     };
 }

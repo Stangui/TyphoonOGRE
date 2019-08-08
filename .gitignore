@@ -1,0 +1,14 @@
+#directories
+.vs
+Intermediate
+bin
+
+#files
+*.user
+*.ilk
+*.obj
+*.iobj
+*.ipdb
+*.vcxproj
+*.sln
+*.filters

@@ -1,5 +1,7 @@
 #pragma once 
 
+#include "OgrePrerequisites.h"
+
 union SDL_Event;
 struct SDL_MouseButtonEvent;
 

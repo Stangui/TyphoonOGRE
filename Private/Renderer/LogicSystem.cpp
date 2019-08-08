@@ -26,8 +26,8 @@
 
 namespace TyphoonEngine
 {
-    LogicSystem::LogicSystem( GameState *gameState ) :
-        BaseSystem( gameState ),
+    LogicSystem::LogicSystem( IGameState *gameState ) :
+        BaseGameSystem( gameState ),
         mGraphicsSystem( 0 ),
         mGameEntityManager( 0 ),
         mCurrentTransformIdx( 1 )
@@ -42,10 +42,10 @@ namespace TyphoonEngine
     {
     }
     //-----------------------------------------------------------------------------------
-    void LogicSystem::finishFrameParallel(void)
+    void LogicSystem::FinishFrameParallel(void)
     {
         if( mGameEntityManager )
-            mGameEntityManager->finishFrameParallel();
+            mGameEntityManager->FinishFrameParallel();
 
         //Notify the GraphicsSystem we're done rendering this frame.
         if( mGraphicsSystem )
@@ -67,13 +67,13 @@ namespace TyphoonEngine
                 mAvailableTransformIdx.pop_front();
             }
 
-            this->queueSendMessage( mGraphicsSystem, Mq::LOGICFRAME_FINISHED, idxToSend );
+            this->QueueSendMessage( mGraphicsSystem, Mq::LOGICFRAME_FINISHED, idxToSend );
         }
 
-        BaseSystem::finishFrameParallel();
+        BaseGameSystem::FinishFrameParallel();
     }
     //-----------------------------------------------------------------------------------
-    void LogicSystem::processIncomingMessage( Mq::MessageId messageId, const void *data )
+    void LogicSystem::ProcessIncomingMessage( Mq::MessageId messageId, const void *data )
     {
         switch( messageId )
         {

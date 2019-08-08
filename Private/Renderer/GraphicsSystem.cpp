@@ -48,23 +48,23 @@
 
 namespace TyphoonEngine
 {
-    GraphicsSystem::GraphicsSystem( GameState *gameState, Ogre::ColourValue backgroundColour ) :
-        BaseSystem( gameState ),
-        mLogicSystem( 0 ),
+    GraphicsSystem::GraphicsSystem( IGameState *gameState, Ogre::ColourValue backgroundColour ) :
+        BaseGameSystem( gameState ),
+        mLogicSystem( nullptr ),
     #if OGRE_USE_SDL2
         mSdlWindow( 0 ),
         mInputHandler( 0 ),
     #endif
-        mRoot( 0 ),
-        mRenderWindow( 0 ),
-        mSceneManager( 0 ),
-        mCamera( 0 ),
-        mWorkspace( 0 ),
+        mRoot( nullptr ),
+        mRenderWindow( nullptr ),
+        mSceneManager( nullptr ),
+        mCamera( nullptr ),
+        mWorkspace( nullptr ),
         mPluginsFolder( "./" ),
-        mOverlaySystem( 0 ),
+        mOverlaySystem( nullptr ),
         mAccumTimeSinceLastLogicFrame( 0 ),
         mCurrentTransformIdx( 0 ),
-        mThreadGameEntityToUpdate( 0 ),
+        mThreadGameEntityToUpdate( nullptr ),
         mThreadWeight( 0 ),
         mQuit( false ),
         mAlwaysAskForConfig( true ),
@@ -81,7 +81,7 @@ namespace TyphoonEngine
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
         mPluginsFolder = mResourcePath;
 #endif
-        if( isWriteAccessFolder( mPluginsFolder, "Ogre.log" ) )
+        if( IsWriteAccessFolder( mPluginsFolder, "Ogre.log" ) )
             mWriteAccessFolder = mPluginsFolder;
         else
         {
@@ -99,21 +99,19 @@ namespace TyphoonEngine
         }
     }
     //-----------------------------------------------------------------------------------
-    bool GraphicsSystem::isWriteAccessFolder( const Ogre::String &folderPath,
-                                              const Ogre::String &fileToSave )
+    bool GraphicsSystem::IsWriteAccessFolder( const Ogre::String &folderPath, const Ogre::String &fileToSave )
     {
         if( !Ogre::FileSystemLayer::createDirectory( folderPath ) )
             return false;
 
-        std::ofstream of( (folderPath + fileToSave).c_str(),
-                          std::ios::out | std::ios::binary | std::ios::app );
+        std::ofstream of( (folderPath + fileToSave).c_str(), std::ios::out | std::ios::binary | std::ios::app );
         if( !of )
             return false;
 
         return true;
     }
     //-----------------------------------------------------------------------------------
-    void GraphicsSystem::initialize( const Ogre::String &windowTitle )
+    void GraphicsSystem::Initialise()
     {
     #if OGRE_USE_SDL2
         //if( SDL_Init( SDL_INIT_EVERYTHING ) != 0 )
@@ -202,7 +200,8 @@ namespace TyphoonEngine
             posY = SDL_WINDOWPOS_UNDEFINED_DISPLAY(screen);
         }
 
-        mSdlWindow = SDL_CreateWindow(
+		const Ogre::String windowTitle = "Typhoon Engine Window";
+		mSdlWindow = SDL_CreateWindow(
                     windowTitle.c_str(),    // window title
                     posX,               // initial x position
                     posY,               // initial y position
@@ -265,17 +264,17 @@ namespace TyphoonEngine
 
         mOverlaySystem = OGRE_NEW Ogre::v1::OverlaySystem();
 
-        setupResources();
-        loadResources();
-        chooseSceneManager();
-        createCamera();
-        mWorkspace = setupCompositor();
+        SetupResources();
+        LoadResources();
+        ChooseSceneManager();
+        CreateCamera();
+        mWorkspace = SetupCompositor();
 
     #if OGRE_USE_SDL2
         mInputHandler = new SdlInputHandler( mSdlWindow, mCurrentGameState, mCurrentGameState, mCurrentGameState );
     #endif
 
-        BaseSystem::initialize();
+        BaseGameSystem::Initialise();
 
 #if OGRE_PROFILING
         Ogre::Profiler::getSingleton().setEnabled( true );
@@ -290,11 +289,11 @@ namespace TyphoonEngine
 #endif
     }
     //-----------------------------------------------------------------------------------
-    void GraphicsSystem::deinitialize(void)
+    void GraphicsSystem::Deinitialise(void)
     {
-        BaseSystem::deinitialize();
+        BaseGameSystem::Deinitialise();
 
-        saveHlmsDiskCache();
+        SaveHlmsDiskCache();
 
         if( mSceneManager )
             mSceneManager->removeRenderQueueListener( mOverlaySystem );
@@ -323,7 +322,7 @@ namespace TyphoonEngine
     #endif
     }
     //-----------------------------------------------------------------------------------
-    void GraphicsSystem::update( float timeSinceLast )
+    void GraphicsSystem::Update( float timeSinceLast )
     {
         Ogre::WindowEventUtilities::messagePump();
 
@@ -334,7 +333,7 @@ namespace TyphoonEngine
             switch( evt.type )
             {
             case SDL_WINDOWEVENT:
-                handleWindowEvent( evt );
+                HandleWindowEvent( evt );
                 break;
             case SDL_QUIT:
                 mQuit = true;
@@ -347,7 +346,7 @@ namespace TyphoonEngine
         }
     #endif
 
-        BaseSystem::update( timeSinceLast );
+        BaseGameSystem::Update( timeSinceLast );
 
         if( mRenderWindow->isVisible() )
             mQuit |= !mRoot->renderOneFrame();
@@ -356,7 +355,7 @@ namespace TyphoonEngine
     }
     //-----------------------------------------------------------------------------------
     #if OGRE_USE_SDL2
-    void GraphicsSystem::handleWindowEvent( const SDL_Event& evt )
+    void GraphicsSystem::HandleWindowEvent( const SDL_Event& evt )
     {
         switch( evt.window.event )
         {
@@ -388,7 +387,7 @@ namespace TyphoonEngine
     }
     #endif
     //-----------------------------------------------------------------------------------
-    void GraphicsSystem::processIncomingMessage( Mq::MessageId messageId, const void *data )
+    void GraphicsSystem::ProcessIncomingMessage( Mq::MessageId messageId, const void *data )
     {
         switch( messageId )
         {
@@ -400,7 +399,7 @@ namespace TyphoonEngine
                 {
                     mAccumTimeSinceLastLogicFrame = 0;
                     //Tell the LogicSystem we're no longer using the index previous to the current one.
-                    this->queueSendMessage( mLogicSystem, Mq::LOGICFRAME_FINISHED,
+                    this->QueueSendMessage( mLogicSystem, Mq::LOGICFRAME_FINISHED,
                                             (mCurrentTransformIdx + NUM_GAME_ENTITY_BUFFERS - 1) %
                                             NUM_GAME_ENTITY_BUFFERS );
 
@@ -413,14 +412,14 @@ namespace TyphoonEngine
             }
             break;
         case Mq::GAME_ENTITY_ADDED:
-            gameEntityAdded( reinterpret_cast<const GameEntityManager::CreatedGameEntity*>( data ) );
+            GameEntityAdded( reinterpret_cast<const GameEntityManager::CreatedGameEntity*>( data ) );
             break;
         case Mq::GAME_ENTITY_REMOVED:
-            gameEntityRemoved( *reinterpret_cast<GameEntity * const *>( data ) );
+            GameEntityRemoved( *reinterpret_cast<GameEntity * const *>( data ) );
             break;
         case Mq::GAME_ENTITY_SCHEDULED_FOR_REMOVAL_SLOT:
             //Acknowledge/notify back that we're done with this slot.
-            this->queueSendMessage( mLogicSystem, Mq::GAME_ENTITY_SCHEDULED_FOR_REMOVAL_SLOT,
+            this->QueueSendMessage( mLogicSystem, Mq::GAME_ENTITY_SCHEDULED_FOR_REMOVAL_SLOT,
                                     *reinterpret_cast<const Ogre::uint32*>( data ) );
             break;
         default:
@@ -428,7 +427,7 @@ namespace TyphoonEngine
         }
     }
     //-----------------------------------------------------------------------------------
-    void GraphicsSystem::addResourceLocation( const Ogre::String &archName, const Ogre::String &typeName,
+    void GraphicsSystem::AddResourceLocation( const Ogre::String &archName, const Ogre::String &typeName,
                                               const Ogre::String &secName )
     {
 #if (OGRE_PLATFORM == OGRE_PLATFORM_APPLE) || (OGRE_PLATFORM == OGRE_PLATFORM_APPLE_IOS)
@@ -442,7 +441,7 @@ namespace TyphoonEngine
 #endif
     }
     //-----------------------------------------------------------------------------------
-    void GraphicsSystem::loadHlmsDiskCache(void)
+    void GraphicsSystem::LoadHlmsDiskCache(void)
     {
         if( !mUseMicrocodeCache && !mUseHlmsDiskCache )
             return;
@@ -496,7 +495,7 @@ namespace TyphoonEngine
         archiveManager.unload( mWriteAccessFolder );
     }
     //-----------------------------------------------------------------------------------
-    void GraphicsSystem::saveHlmsDiskCache(void)
+    void GraphicsSystem::SaveHlmsDiskCache(void)
     {
         if( mRoot->getRenderSystem() && Ogre::GpuProgramManager::getSingletonPtr() &&
             (mUseMicrocodeCache || mUseHlmsDiskCache) )
@@ -535,7 +534,7 @@ namespace TyphoonEngine
         }
     }
     //-----------------------------------------------------------------------------------
-    void GraphicsSystem::setupResources(void)
+    void GraphicsSystem::SetupResources(void)
     {
         // Load resource paths from config file
         Ogre::ConfigFile cf;
@@ -557,13 +556,13 @@ namespace TyphoonEngine
                 {
                     typeName = i->first;
                     archName = i->second;
-                    addResourceLocation( archName, typeName, secName );
+                    AddResourceLocation( archName, typeName, secName );
                 }
             }
         }
     }
     //-----------------------------------------------------------------------------------
-    void GraphicsSystem::registerHlms(void)
+    void GraphicsSystem::RegisterHlms(void)
     {
         Ogre::ConfigFile cf;
         cf.load( mResourcePath + "resources2.cfg" );
@@ -655,17 +654,17 @@ namespace TyphoonEngine
         }
     }
     //-----------------------------------------------------------------------------------
-    void GraphicsSystem::loadResources(void)
+    void GraphicsSystem::LoadResources(void)
     {
-        registerHlms();
+        RegisterHlms();
 
-        loadHlmsDiskCache();
+        LoadHlmsDiskCache();
 
         // Initialise, parse scripts etc
         Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups( true );
     }
     //-----------------------------------------------------------------------------------
-    void GraphicsSystem::chooseSceneManager(void)
+    void GraphicsSystem::ChooseSceneManager(void)
     {
         Ogre::InstancingThreadedCullingMethod threadedCullingMethod = Ogre::INSTANCING_CULLING_SINGLETHREAD;
 #if OGRE_DEBUG_MODE
@@ -695,7 +694,7 @@ namespace TyphoonEngine
         mSceneManager->setShadowFarDistance( 500.0f );
     }
     //-----------------------------------------------------------------------------------
-    void GraphicsSystem::createCamera(void)
+    void GraphicsSystem::CreateCamera(void)
     {
         mCamera = mSceneManager->createCamera( "Main Camera" );
 
@@ -708,7 +707,7 @@ namespace TyphoonEngine
         mCamera->setAutoAspectRatio( true );
     }
     //-----------------------------------------------------------------------------------
-    Ogre::CompositorWorkspace* GraphicsSystem::setupCompositor(void)
+    Ogre::CompositorWorkspace* GraphicsSystem::SetupCompositor(void)
     {
         Ogre::CompositorManager2 *compositorManager = mRoot->getCompositorManager2();
 
@@ -723,7 +722,7 @@ namespace TyphoonEngine
                                                 workspaceName, true );
     }
     //-----------------------------------------------------------------------------------
-    void GraphicsSystem::stopCompositor(void)
+    void GraphicsSystem::StopCompositor(void)
     {
         if( mWorkspace )
         {
@@ -733,10 +732,10 @@ namespace TyphoonEngine
         }
     }
     //-----------------------------------------------------------------------------------
-    void GraphicsSystem::restartCompositor(void)
+    void GraphicsSystem::RestartCompositor(void)
     {
-        stopCompositor();
-        mWorkspace = setupCompositor();
+        StopCompositor();
+        mWorkspace = SetupCompositor();
     }
     //-----------------------------------------------------------------------------------
     //-----------------------------------------------------------------------------------
@@ -762,50 +761,48 @@ namespace TyphoonEngine
         }
     };
     //-----------------------------------------------------------------------------------
-    void GraphicsSystem::gameEntityAdded( const GameEntityManager::CreatedGameEntity *cge )
+    void GraphicsSystem::GameEntityAdded( const GameEntityManager::CreatedGameEntity *cge )
     {
-        Ogre::SceneNode *sceneNode = mSceneManager->getRootSceneNode( cge->gameEntity->mType )->
-                createChildSceneNode( cge->gameEntity->mType,
-                                      cge->initialTransform.vPos,
-                                      cge->initialTransform.qRot );
+        Ogre::SceneNode *sceneNode = mSceneManager->getRootSceneNode( cge->m_gameEntity->mType )->
+                createChildSceneNode( cge->m_gameEntity->mType,
+                                      cge->m_initialTransform.vPos,
+                                      cge->m_initialTransform.qRot );
 
-        sceneNode->setScale( cge->initialTransform.vScale );
+        sceneNode->setScale( cge->m_initialTransform.vScale );
 
-        cge->gameEntity->mSceneNode = sceneNode;
+        cge->m_gameEntity->mSceneNode = sceneNode;
 
-        if( cge->gameEntity->mMoDefinition->moType == MoTypeItem )
+        if( cge->m_gameEntity->mMoDefinition->moType == MoTypeItem )
         {
-            Ogre::Item *item = mSceneManager->createItem( cge->gameEntity->mMoDefinition->meshName,
-                                                          cge->gameEntity->mMoDefinition->resourceGroup,
-                                                          cge->gameEntity->mType );
+            Ogre::Item *item = mSceneManager->createItem( cge->m_gameEntity->mMoDefinition->meshName,
+                                                          cge->m_gameEntity->mMoDefinition->resourceGroup,
+                                                          cge->m_gameEntity->mType );
 
-            Ogre::StringVector materialNames = cge->gameEntity->mMoDefinition->submeshMaterials;
+            Ogre::StringVector materialNames = cge->m_gameEntity->mMoDefinition->submeshMaterials;
             size_t minMaterials = std::min( materialNames.size(), item->getNumSubItems() );
 
             for( size_t i=0; i<minMaterials; ++i )
             {
-                item->getSubItem(i)->setDatablockOrMaterialName( materialNames[i],
-                                                                 cge->gameEntity->mMoDefinition->
-                                                                                    resourceGroup );
+                item->getSubItem(i)->setDatablockOrMaterialName( materialNames[i], cge->m_gameEntity->mMoDefinition->resourceGroup );
             }
 
-            cge->gameEntity->mMovableObject = item;
+            cge->m_gameEntity->mMovableObject = item;
         }
 
-        sceneNode->attachObject( cge->gameEntity->mMovableObject );
+        sceneNode->attachObject( cge->m_gameEntity->mMovableObject );
 
         //Keep them sorted on how Ogre's internal memory manager assigned them memory,
         //to avoid false cache sharing when we update the nodes concurrently.
         const Ogre::Transform &transform = sceneNode->_getTransform();
         GameEntityVec::iterator itGameEntity = std::lower_bound(
-                    mGameEntities[cge->gameEntity->mType].begin(),
-                    mGameEntities[cge->gameEntity->mType].end(),
+                    mGameEntities[cge->m_gameEntity->mType].begin(),
+                    mGameEntities[cge->m_gameEntity->mType].end(),
                     &transform.mDerivedTransform[transform.mIndex],
                     GameEntityCmp() );
-        mGameEntities[cge->gameEntity->mType].insert( itGameEntity, cge->gameEntity );
+        mGameEntities[cge->m_gameEntity->mType].insert( itGameEntity, cge->m_gameEntity );
     }
-    //-----------------------------------------------------------------------------------
-    void GraphicsSystem::gameEntityRemoved( GameEntity *toRemove )
+    //----------------------------------------------------------------------------------
+    void GraphicsSystem::GameEntityRemoved( GameEntity *toRemove )
     {
         const Ogre::Transform &transform = toRemove->mSceneNode->_getTransform();
         GameEntityVec::iterator itGameEntity = std::lower_bound(
@@ -826,7 +823,7 @@ namespace TyphoonEngine
         toRemove->mMovableObject = 0;
     }
     //-----------------------------------------------------------------------------------
-    void GraphicsSystem::updateGameEntities( const GameEntityVec &gameEntities, float weight )
+    void GraphicsSystem::UpdateGameEntities( const GameEntityVec &gameEntities, float weight )
     {
         mThreadGameEntityToUpdate   = &gameEntities;
         mThreadWeight               = weight;

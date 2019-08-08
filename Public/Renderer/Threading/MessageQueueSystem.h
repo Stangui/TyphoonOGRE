@@ -13,6 +13,9 @@ namespace Mq
 {
     class MessageQueueSystem
     {
+
+	private:
+
         static const size_t cSizeOfHeader;
 
         typedef Ogre::FastArray<unsigned char> MessageArray;
@@ -23,8 +26,7 @@ namespace Mq
         PendingMessageMap   mPendingOutgoingMessages;
         MessageArray        mIncomingMessages[2];
 
-        template <typename T> static void storeMessageToQueue( MessageArray &queue,
-                                                               Mq::MessageId messageId, const T &msg )
+        template <typename T> static void storeMessageToQueue( MessageArray &queue, Mq::MessageId messageId, const T &msg )
         {
             //Save the current offset.
             const size_t startOffset = queue.size();
@@ -35,9 +37,8 @@ namespace Mq
             queue.resize( queue.size() + totalSize );
 
             //Write the header: the Size and the MessageId
-            *reinterpret_cast<Ogre::uint32*>( queue.begin() + startOffset ) = totalSize;
-            *reinterpret_cast<Ogre::uint32*>( queue.begin() + startOffset +
-                                              sizeof(Ogre::uint32) )        = messageId;
+            *reinterpret_cast<Ogre::uint32*>( queue.begin() + startOffset ) = static_cast<Ogre::uint32>(totalSize);
+            *reinterpret_cast<Ogre::uint32*>( queue.begin() + startOffset + sizeof(Ogre::uint32) ) = messageId;
 
             //Write the actual message.
             T *dstPtr = reinterpret_cast<T*>( queue.begin() + startOffset + cSizeOfHeader );
@@ -45,6 +46,7 @@ namespace Mq
         }
 
     public:
+
         virtual ~MessageQueueSystem()
         {
         }
@@ -61,14 +63,14 @@ namespace Mq
             The message itself. Structure must be POD.
         */
         template <typename T>
-        void queueSendMessage( MessageQueueSystem *dstSystem, Mq::MessageId messageId, const T &msg )
+        void QueueSendMessage( MessageQueueSystem *dstSystem, Mq::MessageId messageId, const T &msg )
         {
             storeMessageToQueue( mPendingOutgoingMessages[dstSystem], messageId, msg );
         }
 
         /// Sends all the messages queued via see queueSendMessage();
         /// Must be called from the thread that owns 'this'
-        void flushQueuedMessages(void)
+        void FlushQueuedMessages(void)
         {
             PendingMessageMap::iterator itMap = mPendingOutgoingMessages.begin();
             PendingMessageMap::iterator enMap = mPendingOutgoingMessages.end();
@@ -109,7 +111,7 @@ namespace Mq
     protected:
         /// Processes all incoming messages received from other threads.
         /// Should be called from the thread that owns 'this'
-        void processIncomingMessages(void)
+        void ProcessIncomingMessages(void)
         {
             mMessageQueueMutex.lock();
             mIncomingMessages[0].swap( mIncomingMessages[1] );
@@ -129,7 +131,7 @@ namespace Mq
                         "MessageQueue corrupted or invalid message!" );
 
                 const void *data = itor + cSizeOfHeader;
-                processIncomingMessage( static_cast<Mq::MessageId>( messageId ), data );
+                ProcessIncomingMessage( static_cast<Mq::MessageId>( messageId ), data );
                 itor += totalSize;
             }
 
@@ -137,7 +139,7 @@ namespace Mq
         }
 
         /// Derived classes must implement this function to process the incoming message
-        virtual void processIncomingMessage( Mq::MessageId messageId, const void *data ) = 0;
+        virtual void ProcessIncomingMessage( Mq::MessageId messageId, const void *data ) = 0;
     };
 }
 }
