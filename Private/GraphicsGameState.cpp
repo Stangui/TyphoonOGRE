@@ -18,9 +18,7 @@ namespace TyphoonEngine
 	//-----------------------------------------------------------------------------------
 	void GraphicsGameState::Update( float timeSinceLast )
 	{
-		float weight = static_cast<float>(mGraphicsSystem->GetAccumTimeSinceLastLogicFrame() / cFrametime);
-		weight = std::min( 1.0f, weight );
-
+		float weight = std::min( 1.0f, static_cast<float>(mGraphicsSystem->GetAccumTimeSinceLastLogicFrame() / cFrametime) );
 		mGraphicsSystem->UpdateGameEntities( mGraphicsSystem->GetGameEntities( Ogre::SCENE_DYNAMIC ), weight );
 	}
 

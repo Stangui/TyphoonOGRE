@@ -32,9 +32,13 @@ namespace TyphoonEngine
 		mCubeMoDef->resourceGroup = Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME;
 		mCubeMoDef->moType = MoTypeItem;
 
-		mCubeEntity = geMgr->AddGameEntity( Ogre::SCENE_DYNAMIC, mCubeMoDef, origin,
+		mCubeEntity = geMgr->AddGameEntity( 
+			Ogre::SCENE_DYNAMIC, 
+			mCubeMoDef, 
+			origin,
 			Ogre::Quaternion::IDENTITY,
-			Ogre::Vector3::UNIT_SCALE );
+			Ogre::Vector3::UNIT_SCALE 
+		);
 	}
 	//-----------------------------------------------------------------------------------
 	void LogicGameState::Update( float timeSinceLast )

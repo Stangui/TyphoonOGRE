@@ -111,7 +111,7 @@ namespace TyphoonEngine
         return true;
     }
     //-----------------------------------------------------------------------------------
-    void GraphicsSystem::Initialise()
+    void GraphicsSystem::Init()
     {
     #if OGRE_USE_SDL2
         //if( SDL_Init( SDL_INIT_EVERYTHING ) != 0 )
@@ -274,7 +274,7 @@ namespace TyphoonEngine
         mInputHandler = new SdlInputHandler( mSdlWindow, mCurrentGameState, mCurrentGameState, mCurrentGameState );
     #endif
 
-        BaseGameSystem::Initialise();
+        BaseGameSystem::Init();
 
 #if OGRE_PROFILING
         Ogre::Profiler::getSingleton().setEnabled( true );
@@ -289,9 +289,9 @@ namespace TyphoonEngine
 #endif
     }
     //-----------------------------------------------------------------------------------
-    void GraphicsSystem::Deinitialise(void)
+    void GraphicsSystem::Shutdown(void)
     {
-        BaseGameSystem::Deinitialise();
+        BaseGameSystem::Shutdown();
 
         SaveHlmsDiskCache();
 

@@ -97,8 +97,8 @@ namespace TyphoonEngine
 
         inline void SetLogicSystem( BaseGameSystem *logicSystem )	{ mLogicSystem = logicSystem; }
 
-        virtual void Initialise( void ) override;
-        virtual void Deinitialise( void ) override;
+        virtual void Init( void ) override;
+        virtual void Shutdown( void ) override;
 
 		virtual void Update( float deltaTime ) override;
 

@@ -58,7 +58,7 @@ workspace "TyphoonEngine"
 		}
 
 		filter "system:windows"
-			cppdialect "C++11"
+			cppdialect "C++17"
 			staticruntime "Off"
 			systemversion "latest"
 

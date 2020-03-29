@@ -21,8 +21,8 @@ namespace TyphoonEngine
 		LogicGameState();
 		virtual ~LogicGameState() override;
 
-		void Initialise() override {};
-		void Deinitialise() override {};
+		void Init() override {};
+		void Shutdown() override {};
 		virtual void DestroyScene() override {}
 		virtual void FinishFrame() override {}
 		virtual void FinishFrameParallel() override {}

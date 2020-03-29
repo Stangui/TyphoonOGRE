@@ -19,8 +19,8 @@ namespace TyphoonEngine
 		GraphicsGameState( const Ogre::String &helpDescription );
 		virtual ~GraphicsGameState() override {};
 
-		virtual void Initialise() override {}
-		virtual void Deinitialise() override {}
+		virtual void Init() override {}
+		virtual void Shutdown() override {}
 		virtual void CreateScene() override {}
 		virtual void DestroyScene() override {}
 		virtual void FinishFrame() override {}

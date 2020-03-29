@@ -17,8 +17,8 @@ namespace TyphoonEngine
 		BaseGameSystem( IGameState *gameState );
 		virtual ~BaseGameSystem();
 
-		virtual void Initialise( void );
-		virtual void Deinitialise( void );
+		virtual void Init( void );
+		virtual void Shutdown( void );
 
 		virtual void CreateScene( void );
 		virtual void DestroyScene( void );

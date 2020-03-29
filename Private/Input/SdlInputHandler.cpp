@@ -11,10 +11,10 @@
 
 namespace TyphoonEngine
 {
-    SdlInputHandler::SdlInputHandler( SDL_Window *sdlWindow,
-                                      MouseListener *mouseListener,
-                                      KeyboardListener *keyboardListener,
-                                      JoystickListener *joystickListener ) :
+    SdlInputHandler::SdlInputHandler( SDL_Window* sdlWindow,
+                                      MouseListener* mouseListener,
+                                      KeyboardListener* keyboardListener,
+                                      JoystickListener* joystickListener ) :
         mSdlWindow( sdlWindow ),
         mLogicSystem( 0 ),
         mMouseListener( mouseListener ),

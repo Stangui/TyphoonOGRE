@@ -12,10 +12,11 @@ namespace TyphoonEngine
     {
     public:
         
+		IGameState() = default;
 		virtual ~IGameState() {}
 
-		virtual void Initialise( void ) = 0;
-		virtual void Deinitialise( void ) = 0;
+		virtual void Init( void ) = 0;
+		virtual void Shutdown( void ) = 0;
 
 		virtual void CreateScene( void ) = 0;
 		virtual void DestroyScene( void ) = 0;

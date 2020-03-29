@@ -11,14 +11,14 @@ namespace TyphoonEngine
     {
     }
     //-----------------------------------------------------------------------------------
-    void BaseGameSystem::Initialise(void)
+    void BaseGameSystem::Init(void)
     {
-        mCurrentGameState->Initialise();
+        mCurrentGameState->Init();
     }
     //-----------------------------------------------------------------------------------
-    void BaseGameSystem::Deinitialise(void)
+    void BaseGameSystem::Shutdown(void)
     {
-        mCurrentGameState->Deinitialise();
+        mCurrentGameState->Shutdown();
     }
     //-----------------------------------------------------------------------------------
     void BaseGameSystem::CreateScene(void)
