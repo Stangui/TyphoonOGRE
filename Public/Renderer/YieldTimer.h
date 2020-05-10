@@ -6,11 +6,11 @@ namespace TyphoonEngine
 {
 	class YieldTimer
 	{
-		Ogre::Timer *mExternalTimer;
+		Ogre::Timer* const mExternalTimer;
 
 	public:
-		YieldTimer( Ogre::Timer *externalTimer ) :
-			mExternalTimer( externalTimer )
+		
+		YieldTimer( Ogre::Timer* const externalTimer ) : mExternalTimer( externalTimer )
 		{
 		}
 

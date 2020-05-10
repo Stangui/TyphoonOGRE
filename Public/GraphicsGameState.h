@@ -16,12 +16,12 @@ namespace TyphoonEngine
 
 	public:
 
-		GraphicsGameState( const Ogre::String &helpDescription );
+		GraphicsGameState();
 		virtual ~GraphicsGameState() override {};
 
 		virtual void Init() override {}
 		virtual void Shutdown() override {}
-		virtual void CreateScene() override {}
+		virtual void CreateScene() override;
 		virtual void DestroyScene() override {}
 		virtual void FinishFrame() override {}
 		virtual void FinishFrameParallel() override {}

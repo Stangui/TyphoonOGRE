@@ -17,6 +17,6 @@ namespace TyphoonEngine
 
 	public:
 
-		StereoGraphicsSystem( IGameState* gameState );
+		StereoGraphicsSystem( IGameState* GameState );
 	};
 }

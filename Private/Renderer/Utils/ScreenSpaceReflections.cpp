@@ -1,4 +1,3 @@
-
 #include "Utils/ScreenSpaceReflections.h"
 
 #include "OgreMaterialManager.h"
@@ -19,10 +18,9 @@ namespace TyphoonEngine
         0,      0,    1,    0,
         0,      0,    0,    1);
 
-    ScreenSpaceReflections::ScreenSpaceReflections( const Ogre::TexturePtr &globalCubemap,
-                                                    Ogre::RenderSystem *renderSystem ) :
-        mLastUvSpaceViewProjMatrix( PROJECTIONCLIPSPACE2DTOIMAGESPACE_PERSPECTIVE ),
-        mRsDepthRange( 1.0f )
+    ScreenSpaceReflections::ScreenSpaceReflections( const Ogre::TexturePtr &globalCubemap, Ogre::RenderSystem *renderSystem ) 
+        : mLastUvSpaceViewProjMatrix( PROJECTIONCLIPSPACE2DTOIMAGESPACE_PERSPECTIVE )
+        , mRsDepthRange( 1.0f )
     {
         Ogre::MaterialPtr material = Ogre::MaterialManager::getSingleton().load(
                     "SSR/ScreenSpaceReflectionsVectors",

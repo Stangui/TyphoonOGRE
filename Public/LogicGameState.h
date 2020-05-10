@@ -9,17 +9,17 @@ namespace TyphoonEngine
 	struct GameEntity;
 	struct MovableObjectDefinition;
 
-	class LogicGameState : public IGameState
+	class AppLogicState : public IGameState
 	{
-		float						mDisplacement;
-		GameEntity*					mCubeEntity;
-		MovableObjectDefinition*	mCubeMoDef;
-		LogicSystem*				mLogicSystem;
+		float							mDisplacement;
+		GameEntity*						mCubeEntity;
+		MovableObjectDefinition*		mCubeMoDef;
+		LogicSystem*					mLogicSystem;
 
 	public:
 
-		LogicGameState();
-		virtual ~LogicGameState() override;
+		AppLogicState();
+		virtual ~AppLogicState() override;
 
 		void Init() override {};
 		void Shutdown() override {};

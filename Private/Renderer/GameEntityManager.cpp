@@ -8,12 +8,11 @@ namespace TyphoonEngine
 {
     const size_t cNumTransforms = 250;
 
-    GameEntityManager::GameEntityManager( Mq::MessageQueueSystem *graphicsSystem,
-                                          LogicSystem *logicSystem ) :
-        mCurrentId( 0 ),
-        mScheduledForRemovalCurrentSlot( (size_t)-1 ),
-        mGraphicsSystem( graphicsSystem ),
-        mLogicSystem( logicSystem )
+    GameEntityManager::GameEntityManager( Mq::MessageQueueSystem* graphicsSystem, LogicSystem* logicSystem ) 
+        : mCurrentId( 0 )
+        , mScheduledForRemovalCurrentSlot( (size_t)-1 )
+        , mGraphicsSystem( graphicsSystem )
+        , mLogicSystem( logicSystem )
     {
         mLogicSystem->SetGameEntityManager( this );
     }

@@ -10,8 +10,11 @@
 
 namespace TyphoonEngine
 {
-    void SmaaUtils::initialize( Ogre::RenderSystem *renderSystem, PresetQuality quality,
-                                EdgeDetectionMode edgeDetectionMode )
+    void SmaaUtils::initialize( 
+        Ogre::RenderSystem *renderSystem, 
+        PresetQuality quality,                                
+        EdgeDetectionMode edgeDetectionMode 
+    )
     {
         const Ogre::RenderSystemCapabilities *caps = renderSystem->getCapabilities();
 

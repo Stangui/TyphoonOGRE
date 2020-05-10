@@ -3,7 +3,7 @@
 //sdlinputwrapper files as base under the MIT license
 #pragma once 
 
-#include "BaseGameSystem.h"
+#include "BaseSystem.h"
 #include "OgrePrerequisites.h"
 #include "SdlEmulationLayer.h"
 
@@ -19,13 +19,12 @@ namespace TyphoonEngine
 
     class SdlInputHandler
     {
-        SDL_Window  *mSdlWindow;
-
-        BaseGameSystem      *mGraphicsSystem;
-        BaseGameSystem      *mLogicSystem;
-        MouseListener       *mMouseListener;
-        KeyboardListener    *mKeyboardListener;
-        JoystickListener    *mJoystickListener;
+        SDL_Window*         mSdlWindow;
+        BaseSystem*         mGraphicsSystem;
+        BaseSystem*         mLogicSystem;
+        MouseListener*      mMouseListener;
+        KeyboardListener*   mKeyboardListener;
+        JoystickListener*   mJoystickListener;
 
         // User settings
         /// User setting. From the SDL docs: While the mouse is in relative mode, the

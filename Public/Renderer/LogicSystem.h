@@ -1,34 +1,51 @@
 #pragma once 
 
-#include "BaseGameSystem.h"
+#include "BaseSystem.h"
 #include "OgrePrerequisites.h"
 
 namespace TyphoonEngine
 {
     class GameEntityManager;
 
-    class LogicSystem : public BaseGameSystem
+    class LogicSystem : public BaseSystem
     {
     protected:
-        BaseGameSystem*				mGraphicsSystem;
-        GameEntityManager*			mGameEntityManager;
 
-        Ogre::uint32                mCurrentTransformIdx;
-        std::deque<Ogre::uint32>    mAvailableTransformIdx;
+        BaseSystem* m_GraphicsSystem;
+        GameEntityManager* m_GameEntityManager;
+        Ogre::uint32 m_CurrentTransformIdx;
+        std::deque<Ogre::uint32> m_AvailableTransformIdx;
 
         /// @see MessageQueueSystem::processIncomingMessage
-        virtual void ProcessIncomingMessage( Mq::MessageId messageId, const void *data ) override;
+        virtual void ProcessIncomingMessage( Mq::MessageId messageId, const void* data ) override;
 
     public:
-        LogicSystem( IGameState *gameState );
+
+        LogicSystem( IGameState* InitialState );
         virtual ~LogicSystem();
 
-		inline void SetGraphicSystem( BaseGameSystem *graphicsSystem )		{ mGraphicsSystem = graphicsSystem; }
-		inline void SetGameEntityManager( GameEntityManager *mgr )			{ mGameEntityManager = mgr; }
+        // Overrides - IBaseSystem interface
+        virtual void FinishFrameParallel() override;
 
-        void FinishFrameParallel(void) override;
+        inline void SetGraphicSystem( BaseSystem* GraphicsSystem )
+        {
+            m_GraphicsSystem = GraphicsSystem;
+        }
 
-        inline GameEntityManager* GetGameEntityManager(void)               { return mGameEntityManager; }
-        inline Ogre::uint32 GetCurrentTransformIdx(void) const             { return mCurrentTransformIdx; }
+        inline void SetGameEntityManager( GameEntityManager* GEMgr )
+        {
+            m_GameEntityManager = GEMgr;
+        }
+
+        inline GameEntityManager* GetGameEntityManager( void ) const
+        {
+            return m_GameEntityManager;
+        }
+
+        inline Ogre::uint32 GetCurrentTransformIdx( void ) const
+        {
+            return m_CurrentTransformIdx;
+        }
+
     };
 }

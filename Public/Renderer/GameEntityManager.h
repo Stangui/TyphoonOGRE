@@ -29,10 +29,10 @@ namespace TyphoonEngine
             size_t m_count;
             size_t m_bufferIdx;
 
-            Region( size_t _slotOffset, size_t _count, size_t _bufferIdx ) :
-                 m_slotOffset( _slotOffset )
-                ,m_count( _count )
-                ,m_bufferIdx( _bufferIdx )
+            Region( size_t _slotOffset, size_t _count, size_t _bufferIdx ) 
+                : m_slotOffset( _slotOffset )
+                , m_count( _count )
+                , m_bufferIdx( _bufferIdx )
             {
             }
         };
@@ -49,7 +49,7 @@ namespace TyphoonEngine
         std::vector<size_t> mScheduledForRemovalAvailableSlots;
 
         Mq::MessageQueueSystem*	mGraphicsSystem;
-        LogicSystem*			mLogicSystem;
+        LogicSystem* mLogicSystem;
 
         Ogre::uint32 getScheduledForRemovalAvailableSlot(void);
         void destroyAllGameEntitiesIn( GameEntityVec &container );
@@ -59,7 +59,7 @@ namespace TyphoonEngine
 
     public:
 
-        GameEntityManager( Mq::MessageQueueSystem *graphicsSystem, LogicSystem *logicSystem );
+        GameEntityManager( Mq::MessageQueueSystem* graphicsSystem, LogicSystem* logicSystem );
         ~GameEntityManager();
 
         /** Creates a GameEntity, adding it to the world, and scheduling for the Graphics

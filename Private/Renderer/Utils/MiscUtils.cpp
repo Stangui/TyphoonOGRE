@@ -11,8 +11,12 @@
 
 namespace TyphoonEngine
 {
-    void MiscUtils::setGaussianLogFilterParams( Ogre::HlmsComputeJob *job, Ogre::uint8 kernelRadius,
-                                                float gaussianDeviationFactor, Ogre::uint16 K )
+    void MiscUtils::setGaussianLogFilterParams( 
+        Ogre::HlmsComputeJob *job, 
+        Ogre::uint8 kernelRadius,                                                
+        float gaussianDeviationFactor, 
+        Ogre::uint16 K 
+    )
     {
         using namespace Ogre;
 

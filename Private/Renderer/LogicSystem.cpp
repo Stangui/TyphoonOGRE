@@ -26,33 +26,35 @@
 
 namespace TyphoonEngine
 {
-    LogicSystem::LogicSystem( IGameState *gameState ) :
-        BaseGameSystem( gameState ),
-        mGraphicsSystem( 0 ),
-        mGameEntityManager( 0 ),
-        mCurrentTransformIdx( 1 )
+    LogicSystem::LogicSystem( IGameState* InitialState ) 
+        : BaseSystem( InitialState )
+        , m_GraphicsSystem( nullptr )
+        , m_GameEntityManager( nullptr )
+        , m_CurrentTransformIdx( 1 )
     {
         //mCurrentTransformIdx is 1, 0 and NUM_GAME_ENTITY_BUFFERS - 1 are taken by GraphicsSytem at startup
         //The range to fill is then [2; NUM_GAME_ENTITY_BUFFERS-1]
         for( Ogre::uint32 i=2; i<NUM_GAME_ENTITY_BUFFERS-1; ++i )
-            mAvailableTransformIdx.push_back( i );
+            m_AvailableTransformIdx.push_back( i );
     }
+    
     //-----------------------------------------------------------------------------------
     LogicSystem::~LogicSystem()
     {
     }
+     
     //-----------------------------------------------------------------------------------
     void LogicSystem::FinishFrameParallel(void)
     {
-        if( mGameEntityManager )
-            mGameEntityManager->FinishFrameParallel();
+        if( m_GameEntityManager )
+            m_GameEntityManager->FinishFrameParallel();
 
         //Notify the GraphicsSystem we're done rendering this frame.
-        if( mGraphicsSystem )
+        if( m_GraphicsSystem )
         {
-            size_t idxToSend = mCurrentTransformIdx;
+            size_t idxToSend = m_CurrentTransformIdx;
 
-            if( mAvailableTransformIdx.empty() )
+            if( m_AvailableTransformIdx.empty() )
             {
                 //Don't relinquish our only ID left.
                 //If you end up here too often, Graphics' thread is too slow,
@@ -63,15 +65,16 @@ namespace TyphoonEngine
             {
                 //Until Graphics constantly releases the indices we send them, to avoid writing
                 //to transform data that may be in use by the other thread (race condition)
-                mCurrentTransformIdx = mAvailableTransformIdx.front();
-                mAvailableTransformIdx.pop_front();
+                m_CurrentTransformIdx = m_AvailableTransformIdx.front();
+                m_AvailableTransformIdx.pop_front();
             }
 
-            this->QueueSendMessage( mGraphicsSystem, Mq::LOGICFRAME_FINISHED, idxToSend );
+            this->QueueSendMessage( m_GraphicsSystem, Mq::LOGICFRAME_FINISHED, idxToSend );
         }
 
-        BaseGameSystem::FinishFrameParallel();
+        BaseSystem::FinishFrameParallel();
     }
+    
     //-----------------------------------------------------------------------------------
     void LogicSystem::ProcessIncomingMessage( Mq::MessageId messageId, const void *data )
     {
@@ -80,15 +83,15 @@ namespace TyphoonEngine
         case Mq::LOGICFRAME_FINISHED:
             {
                 Ogre::uint32 newIdx = *reinterpret_cast<const Ogre::uint32*>( data );
-                assert( (mAvailableTransformIdx.empty() ||
-                        newIdx == (mAvailableTransformIdx.back() + 1) % NUM_GAME_ENTITY_BUFFERS) &&
+                assert( (m_AvailableTransformIdx.empty() ||
+                        newIdx == (m_AvailableTransformIdx.back() + 1) % NUM_GAME_ENTITY_BUFFERS) &&
                         "Indices are arriving out of order!!!" );
 
-                mAvailableTransformIdx.push_back( newIdx );
+                m_AvailableTransformIdx.push_back( newIdx );
             }
             break;
         case Mq::GAME_ENTITY_SCHEDULED_FOR_REMOVAL_SLOT:
-            mGameEntityManager->_notifyGameEntitiesRemoved( *reinterpret_cast<const Ogre::uint32*>( data ) );
+            m_GameEntityManager->_notifyGameEntitiesRemoved( *reinterpret_cast<const Ogre::uint32*>( data ) );
             break;
         case Mq::SDL_EVENT:
             //TODO

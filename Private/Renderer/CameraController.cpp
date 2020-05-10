@@ -8,18 +8,19 @@
 
 namespace TyphoonEngine
 {
-    CameraController::CameraController( GraphicsSystem *graphicsSystem, bool useSceneNode ) :
-        mUseSceneNode( useSceneNode ),
-        mSpeedMofifier( false ),
-        mCameraYaw( 0 ),
-        mCameraPitch( 0 ),
-        mCameraBaseSpeed( 10 ),
-        mCameraSpeedBoost( 5 ),
-        mGraphicsSystem( graphicsSystem )
+    CameraController::CameraController( GraphicsSystem *graphicsSystem, bool useSceneNode ) 
+        : mUseSceneNode( useSceneNode )
+        , mSpeedMofifier( false )
+        , mCameraYaw( 0 )
+        , mCameraPitch( 0 )
+        , mCameraBaseSpeed( 10 )
+        , mCameraSpeedBoost( 5 )
+        , mGraphicsSystem( graphicsSystem )
     {
         memset( mWASD, 0, sizeof(mWASD) );
         memset( mSlideUpDown, 0, sizeof(mSlideUpDown) );
     }
+    
     //-----------------------------------------------------------------------------------
     void CameraController::update( float timeSinceLast )
     {
@@ -67,6 +68,7 @@ namespace TyphoonEngine
             }
         }
     }
+    
     //-----------------------------------------------------------------------------------
     bool CameraController::keyPressed( const SDL_KeyboardEvent &arg )
     {
@@ -90,6 +92,7 @@ namespace TyphoonEngine
 
         return true;
     }
+    
     //-----------------------------------------------------------------------------------
     bool CameraController::keyReleased( const SDL_KeyboardEvent &arg )
     {
@@ -113,6 +116,7 @@ namespace TyphoonEngine
 
         return true;
     }
+    
     //-----------------------------------------------------------------------------------
     void CameraController::mouseMoved( const SDL_Event &arg )
     {
