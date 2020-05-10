@@ -12,3 +12,5 @@ bin
 *.vcxproj
 *.sln
 *.filters
+/.gitattributes
+/*.log
