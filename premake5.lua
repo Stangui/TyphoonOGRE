@@ -1,6 +1,6 @@
 workspace "TyphoonEngine"
 	architecture "x64"
-	startproject "TyphoonApp"
+	startproject "TyphoonSandbox"
 
 	configurations
 	{
@@ -15,7 +15,7 @@ workspace "TyphoonEngine"
 	IncludeDir["OGRE"] = "ThirdParty/OGRE/include/OGRE"
 	IncludeDir["SDL2"] = "ThirdParty/SDL2/include/SDL2"
 
-	project "TyphoonApp"
+	project "TyphoonSandbox"
 		kind "WindowedApp"
 		language "C++"
 

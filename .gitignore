@@ -1,7 +1,7 @@
 #directories
 .vs
-Intermediate
-bin
+/Intermediate
+/bin
 
 #files
 *.user
