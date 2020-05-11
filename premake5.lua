@@ -22,6 +22,8 @@ workspace "TyphoonEngine"
 		targetdir ("bin/" .. "%{cfg.buildcfg}")
 		objdir ("Intermediate/" .. "%{cfg.buildcfg}")
 
+		disablewarnings { "5033" }
+
 		files
 		{
 			"Private/**.cpp",

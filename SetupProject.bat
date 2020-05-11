@@ -1,2 +1,2 @@
 call "%~dp0premake/premake5.exe" vs2019
-pause
+call "%~dp0CopyResources.bat"

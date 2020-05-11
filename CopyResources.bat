@@ -18,12 +18,10 @@ call robocopy "%~dp0ThirdParty/SDL2/Bin" "%~dp0bin/debug" SDL2_d.dll /np /r:1 /x
 if %errorlevel% GEQ 8 exit /b %errorlevel%
 call robocopy "%~dp0ThirdParty/OGRE/Bin/release" "%~dp0bin/release" *.dll *.pdb /np /r:1 /xo
 if %errorlevel% GEQ 8 exit /b %errorlevel%
-call robocopy "%~dp0ThirdParty/SDL2/Bin" "%~dp0bin/release" SDL2_d.dll /np /r:1 /xo
+call robocopy "%~dp0ThirdParty/SDL2/Bin" "%~dp0bin/release" SDL2.dll /np /r:1 /xo
 if %errorlevel% GEQ 8 exit /b %errorlevel%
 call robocopy "%~dp0ThirdParty/OGRE/Bin/release" "%~dp0bin/shipping" *.dll *.pdb /np /r:1 /xo
 if %errorlevel% GEQ 8 exit /b %errorlevel%
 call robocopy "%~dp0ThirdParty/SDL2/Bin" "%~dp0bin/shipping" SDL2.dll /np /r:1 /xo
 if %errorlevel% GEQ 8 exit /b %errorlevel%
-
 echo Done
-pause
