@@ -5,7 +5,7 @@
 
 namespace TyphoonEngine
 {
-    class GraphicsSystem;
+    class Renderer;
     class LogicSystem;
 
     class GameEntityManager

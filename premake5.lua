@@ -11,18 +11,16 @@ workspace "TyphoonEngine"
 
 	platforms { "x64" }
 
-	outputdir = "%{cfg.buildcfg}-%{cfg.platform}"
-
 	IncludeDir = {}
-	IncludeDir["OGRE"] = "$(OGRE)/include/OGRE"
-	IncludeDir["SDL2"] = "$(OGRE)/include/SDL2"
+	IncludeDir["OGRE"] = "ThirdParty/OGRE/include/OGRE"
+	IncludeDir["SDL2"] = "ThirdParty/SDL2/include/SDL2"
 
 	project "TyphoonApp"
 		kind "WindowedApp"
 		language "C++"
 
-		targetdir ("bin/" ..  outputdir .. "/%{prj.name}")
-		objdir ("Intermediate/" .. outputdir .. "/%{prj.name}")
+		targetdir ("bin/" .. "%{cfg.buildcfg}")
+		objdir ("Intermediate/" .. "%{cfg.buildcfg}")
 
 		files
 		{
@@ -43,18 +41,17 @@ workspace "TyphoonEngine"
 			IncludeDir.SDL2
 		}
 
-		libdirs
-		{
-			"$(OGRE)/lib"
-		}
-
 		links
 		{
-			"SDL2",
-			"SDL2Main",
 			"winmm",
 			"imm32",
 			"version"
+		}
+
+		libdirs
+		{
+			"ThirdParty/OGRE/lib/%{cfg.buildcfg}",
+			"ThirdParty/SDL2/lib"
 		}
 
 		filter "system:windows"
@@ -70,19 +67,16 @@ workspace "TyphoonEngine"
 		filter "configurations:Debug"
 			defines "TYPHOON_DEBUG"
 			symbols "On"
-			libdirs { "$(OGRE)/lib/Debug" }
-			links { "OgreMain_d", "OgreHlmsPbs_d", "OgreHlmsUnlit_d", "OgreOverlay_d" }
-
+			links { "SDL2_d", "SDL2main_d", "OgreMain_d", "OgreHlmsPbs_d", "OgreHlmsUnlit_d", "OgreOverlay_d" }
 
 		filter "configurations:Release"
 			defines { "TYPHOON_RELEASE", "OGRE_IGNORE_UNKNOWN_DEBUG" }
 			symbols "On"
 			optimize "On"
-			libdirs { "$(OGRE)/lib/Release" }
-			links { "OgreMain", "OgreHlmsPbs", "OgreHlmsUnlit", "OgreOverlay" }
+			links { "SDL2", "SDL2main", "OgreMain", "OgreHlmsPbs", "OgreHlmsUnlit", "OgreOverlay" }
 
 		filter "configurations:Shipping"
 			defines { "TYPHOON_SHIPPING", "OGRE_IGNORE_UNKNOWN_DEBUG" }
 			optimize "On"
-			libdirs { "$(OGRE)/lib/Release" }
-			links { "OgreMain", "OgreHlmsPbs", "OgreHlmsUnlit", "OgreOverlay" }
+			libdirs { "ThirdParty/OGRE/lib/Release" }
+			links { "SDL2", "SDL2main", "OgreMain", "OgreHlmsPbs", "OgreHlmsUnlit", "OgreOverlay" }

@@ -20,7 +20,7 @@ namespace TyphoonEngine
 {
     class SdlInputHandler;
 
-    class GraphicsSystem : public BaseSystem, public Ogre::UniformScalableTask
+    class Renderer : public BaseSystem, public Ogre::UniformScalableTask
     {
     protected:
         BaseSystem*                mLogicSystem;
@@ -45,15 +45,15 @@ namespace TyphoonEngine
         /// Tracks the amount of elapsed time since we last
         /// heard from the LogicSystem finishing a frame
         float               mAccumTimeSinceLastLogicFrame;
+        float               mThreadWeight;
         Ogre::uint32        mCurrentTransformIdx;
         GameEntityVec       mGameEntities[ Ogre::NUM_SCENE_MEMORY_MANAGER_TYPES ];
         GameEntityVec const* mThreadGameEntityToUpdate;
-        float               mThreadWeight;
-        bool                mQuit;
-        bool                mAlwaysAskForConfig;
-        bool                mUseHlmsDiskCache;
-        bool                mUseMicrocodeCache;
-        bool                bShowDebug;
+        Ogre::uint32        mQuit : 1;
+        Ogre::uint32        mAlwaysAskForConfig : 1;
+        Ogre::uint32        mUseHlmsDiskCache : 1;
+        Ogre::uint32        mUseMicrocodeCache : 1;
+        Ogre::uint32        bShowDebug : 1;
 
         Ogre::ColourValue   mBackgroundColour;
         Ogre::v1::TextAreaOverlayElement* mDebugText;
@@ -61,6 +61,7 @@ namespace TyphoonEngine
 
         void createDebugTextOverlay( void );
         void generateDebugText( float timeSinceLast );
+        bool ParseConfigs( const char* configFilepath );
 
 #if OGRE_USE_SDL2
         void HandleWindowEvent( const SDL_Event& evt );
@@ -99,8 +100,8 @@ namespace TyphoonEngine
 
     public:
 
-        GraphicsSystem( IGameState* GameState, Ogre::ColourValue backgroundColour = Ogre::ColourValue( 0.2f, 0.4f, 0.6f ) );
-        virtual ~GraphicsSystem() override;
+        Renderer( IGameState* GameState, Ogre::ColourValue backgroundColour = Ogre::ColourValue( 0.2f, 0.4f, 0.6f ) );
+        virtual ~Renderer() override;
 
         inline void SetLogicSystem( BaseSystem* logicSystem )
         {
@@ -141,11 +142,11 @@ namespace TyphoonEngine
 
         inline void SetQuit( void )
         {
-            mQuit = true;
+            mQuit = 1;
         }
         inline bool GetQuit( void ) const
         {
-            return mQuit;
+            return mQuit != 0;
         }
 
         inline float GetAccumTimeSinceLastLogicFrame( void ) const
@@ -195,7 +196,7 @@ namespace TyphoonEngine
 
         inline bool IsDebugTextVisible() const
         {
-            return bShowDebug;
+            return bShowDebug != 0;
         }
 
         virtual void StopCompositor( void );

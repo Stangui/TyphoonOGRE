@@ -25,7 +25,7 @@ namespace TyphoonEngine
 
     struct ThreadData
     {
-        GraphicsSystem* m_GraphicsSystem;
+        Renderer*   m_GraphicsSystem;
         LogicSystem*    m_LogicSystem;
         Ogre::Barrier*  m_Barriers;
 
@@ -50,7 +50,7 @@ namespace TyphoonEngine
 
         GameEntityManager*  m_GameEntityManager;
         GraphicsGameState*  m_GraphicsGameState;
-        GraphicsSystem*     m_GraphicsSystem;
+        Renderer*       m_GraphicsSystem;
         AppLogicState*      m_LogicGameState;
         LogicSystem*        m_LogicSystem;
         Ogre::Barrier*      m_Barriers;
