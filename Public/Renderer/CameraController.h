@@ -5,7 +5,7 @@
 
 namespace TyphoonEngine
 {
-	class Renderer;
+	class GraphicsSystem;
 
 	/**
 	* Basic WASD camera controller
@@ -29,11 +29,11 @@ namespace TyphoonEngine
 
 	private:
 
-		Renderer*	mGraphicsSystem;
+		GraphicsSystem*	mGraphicsSystem;
 
 	public:
 		
-		CameraController( Renderer*graphicsSystem, bool useSceneNode = false );
+		CameraController( GraphicsSystem*graphicsSystem, bool useSceneNode = false );
 
 		void update( float timeSinceLast );
 

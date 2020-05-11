@@ -57,7 +57,9 @@
 namespace TyphoonEngine
 {
 
-    Renderer::Renderer( IGameState* InitialState, Ogre::ColourValue backgroundColour )
+    static const char* CONFIGS_FOLDER = ".\\Configs\\";
+  
+    GraphicsSystem::GraphicsSystem( IGameState* InitialState, Ogre::ColourValue backgroundColour )
         : BaseSystem( InitialState )
         , mLogicSystem( nullptr )
 #if OGRE_USE_SDL2
@@ -69,7 +71,9 @@ namespace TyphoonEngine
         , mSceneManager( nullptr )
         , mCamera( nullptr )
         , mWorkspace( nullptr )
-        , mPluginsFolder( "./" )
+        , mConfigsFolder( CONFIGS_FOLDER )
+        , mSaveFolder("")
+        , mResourcePath( CONFIGS_FOLDER )
         , mOverlaySystem( nullptr )
         , mDebugPanel( nullptr )
         , mAccumTimeSinceLastLogicFrame( 0 )
@@ -77,7 +81,6 @@ namespace TyphoonEngine
         , mThreadGameEntityToUpdate( nullptr )
         , mThreadWeight( 0 )
         , mQuit( 0 )
-        , mAlwaysAskForConfig( 1 )
         , mUseHlmsDiskCache( 1 )
         , mUseMicrocodeCache( 1 )
         , bShowDebug( 0 )
@@ -92,27 +95,22 @@ namespace TyphoonEngine
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
         mPluginsFolder = mResourcePath;
 #endif
-        if ( IsWriteAccessFolder( mPluginsFolder, "Ogre.log" ) )
-            mWriteAccessFolder = mPluginsFolder;
-        else
-        {
-            Ogre::FileSystemLayer filesystemLayer( OGRE_VERSION_NAME );
-            mWriteAccessFolder = filesystemLayer.getWritablePath( "" );
-        }
+        Ogre::FileSystemLayer filesystemLayer( OGRE_VERSION_NAME );
+        mSaveFolder = filesystemLayer.getWritablePath( "" );
     }
 
     //-----------------------------------------------------------------------------------
-    Renderer::~Renderer()
+    GraphicsSystem::~GraphicsSystem()
     {
         if ( mRoot )
         {
             Ogre::LogManager::getSingleton().logMessage(
-                "WARNING: Renderer::deinitialize() not called!!!", Ogre::LML_CRITICAL );
+                "WARNING: GraphicsSystem::deinitialize() not called!!!", Ogre::LML_CRITICAL );
         }
     }
 
     //-----------------------------------------------------------------------------------
-    bool Renderer::IsWriteAccessFolder( const Ogre::String& folderPath, const Ogre::String& fileToSave )
+    bool GraphicsSystem::IsWriteAccessFolder( const Ogre::String& folderPath, const Ogre::String& fileToSave )
     {
         if ( !Ogre::FileSystemLayer::createDirectory( folderPath ) )
             return false;
@@ -125,13 +123,13 @@ namespace TyphoonEngine
     }
 
     //-----------------------------------------------------------------------------------
-    bool Renderer::ParseConfigs( const char* configFilepath )
+    bool GraphicsSystem::ParseConfigs( const char* configFilepath )
     {
         return false;
     }
 
     //-----------------------------------------------------------------------------------
-    void Renderer::Init()
+    void GraphicsSystem::Init()
     {
 
 #if OGRE_USE_SDL2
@@ -145,7 +143,7 @@ namespace TyphoonEngine
             OGRE_EXCEPT(
                 Ogre::Exception::ERR_INTERNAL_ERROR,
                 "Cannot initialize SDL2!",
-                "Renderer::initialize" );
+                "GraphicsSystem::initialize" );
         }
 #endif
 
@@ -153,18 +151,18 @@ namespace TyphoonEngine
         // only use plugins.cfg if not static
 #ifndef OGRE_STATIC_LIB
 #if OGRE_DEBUG_MODE && !((OGRE_PLATFORM == OGRE_PLATFORM_APPLE) || (OGRE_PLATFORM == OGRE_PLATFORM_APPLE_IOS))
-        pluginsPath = mPluginsFolder+"plugins_d.cfg";
+        pluginsPath = mConfigsFolder+"plugins_d.cfg";
 #else
-        pluginsPath = mPluginsFolder+"plugins.cfg";
+        pluginsPath = mConfigsFolder+"plugins.cfg";
 #endif
 #endif
 
         mRoot = OGRE_NEW Ogre::Root( 
             pluginsPath,
-            mWriteAccessFolder+"ogre.cfg",
-            mWriteAccessFolder+"Ogre.log" );
+            mConfigsFolder+"Ogre.cfg",
+            mSaveFolder+"Ogre.log" );
 
-        if ( mAlwaysAskForConfig||!mRoot->restoreConfig() )
+        if ( !mRoot->restoreConfig() )
         {
             if ( !mRoot->showConfigDialog() )
             {
@@ -241,7 +239,7 @@ namespace TyphoonEngine
         {
             OGRE_EXCEPT( Ogre::Exception::ERR_INTERNAL_ERROR,
                 "Couldn't get WM Info! (SDL2)",
-                "Renderer::initialize" );
+                "GraphicsSystem::initialize" );
         }
 
         Ogre::String winHandle;
@@ -267,7 +265,7 @@ namespace TyphoonEngine
         default:
             OGRE_EXCEPT( Ogre::Exception::ERR_NOT_IMPLEMENTED,
                 "Unexpected WM! (SDL2)",
-                "Renderer::initialize" );
+                "GraphicsSystem::initialize" );
             break;
         }
 
@@ -313,7 +311,7 @@ namespace TyphoonEngine
     }
 
     //-----------------------------------------------------------------------------------
-    void Renderer::ShowDebugText( bool bShow )
+    void GraphicsSystem::ShowDebugText( bool bShow )
     {
         bShowDebug = bShow;
         if ( mDebugPanel )
@@ -323,7 +321,7 @@ namespace TyphoonEngine
     }
 
     //-----------------------------------------------------------------------------------
-    void Renderer::createDebugTextOverlay( void )
+    void GraphicsSystem::createDebugTextOverlay( void )
     {
         Ogre::v1::OverlayManager& overlayManager = Ogre::v1::OverlayManager::getSingleton();
         mDebugPanel = overlayManager.create( "DebugText" );
@@ -348,7 +346,7 @@ namespace TyphoonEngine
     }
 
     //-----------------------------------------------------------------------------------
-    void Renderer::generateDebugText( float timeSinceLast )
+    void GraphicsSystem::generateDebugText( float timeSinceLast )
     {
         const Ogre::FrameStats* frameStats = GetRoot()->getFrameStats();
 
@@ -370,7 +368,7 @@ namespace TyphoonEngine
     }
 
     //-----------------------------------------------------------------------------------
-    void Renderer::Shutdown( void )
+    void GraphicsSystem::Shutdown( void )
     {
         BaseSystem::Shutdown();
 
@@ -403,7 +401,7 @@ namespace TyphoonEngine
     }
     
     //-----------------------------------------------------------------------------------
-    void Renderer::Update( float timeSinceLast )
+    void GraphicsSystem::Update( float timeSinceLast )
     {
         Ogre::WindowEventUtilities::messagePump();
 
@@ -442,7 +440,7 @@ namespace TyphoonEngine
     
     //-----------------------------------------------------------------------------------
 #if OGRE_USE_SDL2
-    void Renderer::HandleWindowEvent( const SDL_Event& evt )
+    void GraphicsSystem::HandleWindowEvent( const SDL_Event& evt )
     {
         switch ( evt.window.event )
         {
@@ -475,7 +473,7 @@ namespace TyphoonEngine
 #endif
     
     //-----------------------------------------------------------------------------------
-    void Renderer::ProcessIncomingMessage( Mq::MessageId messageId, const void* data )
+    void GraphicsSystem::ProcessIncomingMessage( Mq::MessageId messageId, const void* data )
     {
         switch ( messageId )
         {
@@ -518,7 +516,7 @@ namespace TyphoonEngine
     }
     
     //-----------------------------------------------------------------------------------
-    void Renderer::AddResourceLocation(
+    void GraphicsSystem::AddResourceLocation(
         const Ogre::String& archName,
         const Ogre::String& typeName,
         const Ogre::String& secName )
@@ -535,7 +533,7 @@ namespace TyphoonEngine
     }
     
     //-----------------------------------------------------------------------------------
-    void Renderer::LoadHlmsDiskCache( void )
+    void GraphicsSystem::LoadHlmsDiskCache( void )
     {
         if ( mUseMicrocodeCache==0 && mUseHlmsDiskCache==0 )
             return;
@@ -543,7 +541,7 @@ namespace TyphoonEngine
         Ogre::HlmsManager* hlmsManager = mRoot->getHlmsManager();
         Ogre::HlmsDiskCache diskCache( hlmsManager );
         Ogre::ArchiveManager& archiveManager = Ogre::ArchiveManager::getSingleton();
-        Ogre::Archive* rwAccessFolderArchive = archiveManager.load( mWriteAccessFolder, "FileSystem", true );
+        Ogre::Archive* rwAccessFolderArchive = archiveManager.load( mSaveFolder, "FileSystem", true );
 
         if ( mUseMicrocodeCache != 0 )
         {
@@ -578,7 +576,7 @@ namespace TyphoonEngine
                     catch ( Ogre::Exception& )
                     {
                         Ogre::LogManager::getSingleton().logMessage(
-                            "Error loading cache from "+mWriteAccessFolder+"/"+
+                            "Error loading cache from "+mSaveFolder+"/"+
                             filename+"! If you have issues, try deleting the file "
                             "and restarting the app" );
                     }
@@ -586,11 +584,11 @@ namespace TyphoonEngine
             }
         }
 
-        archiveManager.unload( mWriteAccessFolder );
+        archiveManager.unload( mSaveFolder );
     }
     
     //-----------------------------------------------------------------------------------
-    void Renderer::SaveHlmsDiskCache( void )
+    void GraphicsSystem::SaveHlmsDiskCache( void )
     {
         if ( mRoot->getRenderSystem() && 
             Ogre::GpuProgramManager::getSingletonPtr() &&
@@ -599,7 +597,7 @@ namespace TyphoonEngine
             Ogre::HlmsManager* hlmsManager = mRoot->getHlmsManager();
             Ogre::HlmsDiskCache diskCache( hlmsManager );
             Ogre::ArchiveManager& archiveManager = Ogre::ArchiveManager::getSingleton();
-            Ogre::Archive* rwAccessFolderArchive = archiveManager.load( mWriteAccessFolder, "FileSystem", false );
+            Ogre::Archive* rwAccessFolderArchive = archiveManager.load( mSaveFolder, "FileSystem", false );
 
             if ( mUseHlmsDiskCache )
             {
@@ -626,12 +624,12 @@ namespace TyphoonEngine
                 Ogre::GpuProgramManager::getSingleton().saveMicrocodeCache( shaderCacheFile );
             }
 
-            archiveManager.unload( mWriteAccessFolder );
+            archiveManager.unload( mSaveFolder );
         }
     }
     
     //-----------------------------------------------------------------------------------
-    void Renderer::SetupResources( void )
+    void GraphicsSystem::SetupResources( void )
     {
         // Load resource paths from config file
         Ogre::ConfigFile cf;
@@ -660,7 +658,7 @@ namespace TyphoonEngine
     }
     
     //-----------------------------------------------------------------------------------
-    void Renderer::RegisterHlms( void )
+    void GraphicsSystem::RegisterHlms( void )
     {
         Ogre::ConfigFile cf;
         cf.load( mResourcePath+"resources2.cfg" );
@@ -753,7 +751,7 @@ namespace TyphoonEngine
     }
     
     //-----------------------------------------------------------------------------------
-    void Renderer::LoadResources( void )
+    void GraphicsSystem::LoadResources( void )
     {
         RegisterHlms();
 
@@ -764,7 +762,7 @@ namespace TyphoonEngine
     }
     
     //-----------------------------------------------------------------------------------
-    void Renderer::ChooseSceneManager( void )
+    void GraphicsSystem::ChooseSceneManager( void )
     {
         Ogre::InstancingThreadedCullingMethod threadedCullingMethod = Ogre::INSTANCING_CULLING_SINGLETHREAD;
 #if OGRE_DEBUG_MODE
@@ -795,7 +793,7 @@ namespace TyphoonEngine
     }
     
     //-----------------------------------------------------------------------------------
-    void Renderer::CreateCamera( void )
+    void GraphicsSystem::CreateCamera( void )
     {
         mCamera = mSceneManager->createCamera( "Main Camera" );
 
@@ -816,7 +814,7 @@ namespace TyphoonEngine
     }
     
     //-----------------------------------------------------------------------------------
-    Ogre::CompositorWorkspace* Renderer::SetupCompositor( void )
+    Ogre::CompositorWorkspace* GraphicsSystem::SetupCompositor( void )
     {
         Ogre::CompositorManager2* compositorManager = mRoot->getCompositorManager2();
         const Ogre::String workspaceName( "Typhoon Workspace" );
@@ -834,7 +832,7 @@ namespace TyphoonEngine
     }
        
     //-----------------------------------------------------------------------------------
-    void Renderer::StopCompositor( void )
+    void GraphicsSystem::StopCompositor( void )
     {
         if ( mWorkspace )
         {
@@ -845,7 +843,7 @@ namespace TyphoonEngine
     }
     
     //-----------------------------------------------------------------------------------
-    void Renderer::RestartCompositor( void )
+    void GraphicsSystem::RestartCompositor( void )
     {
         StopCompositor();
         mWorkspace = SetupCompositor();
@@ -876,7 +874,7 @@ namespace TyphoonEngine
     };
     
     //-----------------------------------------------------------------------------------
-    void Renderer::GameEntityAdded( const GameEntityManager::CreatedGameEntity* cge )
+    void GraphicsSystem::GameEntityAdded( const GameEntityManager::CreatedGameEntity* cge )
     {
         Ogre::SceneNode* sceneNode = mSceneManager->getRootSceneNode( cge->m_gameEntity->mType )->
             createChildSceneNode( cge->m_gameEntity->mType,
@@ -918,7 +916,7 @@ namespace TyphoonEngine
     }
     
     //----------------------------------------------------------------------------------
-    void Renderer::GameEntityRemoved( GameEntity* toRemove )
+    void GraphicsSystem::GameEntityRemoved( GameEntity* toRemove )
     {
         const Ogre::Transform& transform = toRemove->mSceneNode->_getTransform();
         GameEntityVec::iterator itGameEntity = std::lower_bound(
@@ -940,7 +938,7 @@ namespace TyphoonEngine
     }
     
     //-----------------------------------------------------------------------------------
-    void Renderer::UpdateGameEntities( const GameEntityVec& gameEntities, float weight )
+    void GraphicsSystem::UpdateGameEntities( const GameEntityVec& gameEntities, float weight )
     {
         mThreadGameEntityToUpdate = &gameEntities;
         mThreadWeight = weight;
@@ -952,7 +950,7 @@ namespace TyphoonEngine
     }
     
     //-----------------------------------------------------------------------------------
-    void Renderer::execute( size_t threadId, size_t numThreads )
+    void GraphicsSystem::execute( size_t threadId, size_t numThreads )
     {
         size_t currIdx = mCurrentTransformIdx;
         size_t prevIdx = ( mCurrentTransformIdx+NUM_GAME_ENTITY_BUFFERS-1 ) % NUM_GAME_ENTITY_BUFFERS;

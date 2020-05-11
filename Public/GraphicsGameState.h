@@ -5,14 +5,14 @@
 
 namespace TyphoonEngine
 {
-	class Renderer;
+	class GraphicsSystem;
 
 	class GraphicsGameState : public IGameState
 	{
 	
 	private:
 
-		Renderer* mGraphicsSystem;
+		GraphicsSystem* mGraphicsSystem;
 
 	public:
 
@@ -26,7 +26,7 @@ namespace TyphoonEngine
 		virtual void FinishFrame() override {}
 		virtual void FinishFrameParallel() override {}
 		virtual void Update( float timeSinceLast ) override;
-		inline virtual void SetGraphicSystem( Renderer* sys ) { mGraphicsSystem = sys; }
+		inline virtual void SetGraphicSystem( GraphicsSystem* sys ) { mGraphicsSystem = sys; }
 		
 		virtual void keyReleased( const SDL_KeyboardEvent &arg );
 	};

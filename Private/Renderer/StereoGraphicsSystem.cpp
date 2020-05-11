@@ -92,7 +92,7 @@ namespace TyphoonEngine
 	}
 
 	//-------------------------------------------------------------------------------
-	StereoGraphicsSystem::StereoGraphicsSystem( IGameState* GameState ) : Renderer( GameState )
+	StereoGraphicsSystem::StereoGraphicsSystem( IGameState* GameState ) : GraphicsSystem( GameState )
 	{
 	}
 };

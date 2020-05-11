@@ -1,17 +1,6 @@
 #pragma once
 
-#include "GraphicsSystem.h"
-#include "LogicSystem.h"
-#include "GraphicsGameState.h"
-#include "GameEntityManager.h"
-#include "LogicGameState.h"
-#include "YieldTimer.h"
-
-#include <OgreRenderWindow.h>
-#include <OgreTimer.h>
-
-#include "Threading/OgreThreads.h"
-#include "Threading/OgreBarrier.h"
+#include <cstring>
 
 #include "TyphoonCore.h"
 
@@ -23,15 +12,21 @@ namespace Ogre
 namespace TyphoonEngine
 {
 
+    class GameEntityManager;
+    class GraphicsGameState;    
+    class GraphicsSystem;
+    class AppLogicState;
+    class LogicSystem;
+
     struct ThreadData
     {
-        Renderer*   m_GraphicsSystem;
+        GraphicsSystem*   m_GraphicsSystem;
         LogicSystem*    m_LogicSystem;
         Ogre::Barrier*  m_Barriers;
 
         ThreadData()
         {
-            ZeroMemory( this, sizeof( ThreadData ) );
+            memset( this, 0, sizeof( ThreadData ) );
         }
     };
 
@@ -50,7 +45,7 @@ namespace TyphoonEngine
 
         GameEntityManager*  m_GameEntityManager;
         GraphicsGameState*  m_GraphicsGameState;
-        Renderer*       m_GraphicsSystem;
+        GraphicsSystem*       m_GraphicsSystem;
         AppLogicState*      m_LogicGameState;
         LogicSystem*        m_LogicSystem;
         Ogre::Barrier*      m_Barriers;

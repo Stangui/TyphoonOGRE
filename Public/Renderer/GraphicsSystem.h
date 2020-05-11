@@ -20,7 +20,7 @@ namespace TyphoonEngine
 {
     class SdlInputHandler;
 
-    class Renderer : public BaseSystem, public Ogre::UniformScalableTask
+    class GraphicsSystem : public BaseSystem, public Ogre::UniformScalableTask
     {
     protected:
         BaseSystem*                mLogicSystem;
@@ -36,8 +36,8 @@ namespace TyphoonEngine
         Ogre::Camera*               mCamera;
         Ogre::Light*                mLight;
         Ogre::CompositorWorkspace*  mWorkspace;
-        Ogre::String                mPluginsFolder;
-        Ogre::String                mWriteAccessFolder;
+        Ogre::String                mConfigsFolder;
+        Ogre::String                mSaveFolder;
         Ogre::String                mResourcePath;
         Ogre::v1::OverlaySystem*    mOverlaySystem;
         Ogre::v1::Overlay*          mDebugPanel;
@@ -50,7 +50,6 @@ namespace TyphoonEngine
         GameEntityVec       mGameEntities[ Ogre::NUM_SCENE_MEMORY_MANAGER_TYPES ];
         GameEntityVec const* mThreadGameEntityToUpdate;
         Ogre::uint32        mQuit : 1;
-        Ogre::uint32        mAlwaysAskForConfig : 1;
         Ogre::uint32        mUseHlmsDiskCache : 1;
         Ogre::uint32        mUseMicrocodeCache : 1;
         Ogre::uint32        bShowDebug : 1;
@@ -100,8 +99,8 @@ namespace TyphoonEngine
 
     public:
 
-        Renderer( IGameState* GameState, Ogre::ColourValue backgroundColour = Ogre::ColourValue( 0.2f, 0.4f, 0.6f ) );
-        virtual ~Renderer() override;
+        GraphicsSystem( IGameState* GameState, Ogre::ColourValue backgroundColour = Ogre::ColourValue( 0.2f, 0.4f, 0.6f ) );
+        virtual ~GraphicsSystem() override;
 
         inline void SetLogicSystem( BaseSystem* logicSystem )
         {
@@ -181,11 +180,11 @@ namespace TyphoonEngine
 
         inline const Ogre::String& GetPluginsFolder( void ) const
         {
-            return mPluginsFolder;
+            return mConfigsFolder;
         }
         inline const Ogre::String& GetWriteAccessFolder( void ) const
         {
-            return mWriteAccessFolder;
+            return mSaveFolder;
         }
         inline const Ogre::String& GetResourcePath( void ) const
         {

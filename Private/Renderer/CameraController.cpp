@@ -8,7 +8,7 @@
 
 namespace TyphoonEngine
 {
-    CameraController::CameraController( Renderer* graphicsSystem, bool useSceneNode )
+    CameraController::CameraController( GraphicsSystem* graphicsSystem, bool useSceneNode )
         : mUseSceneNode( useSceneNode )
         , mSpeedMofifier( false )
         , mCameraYaw( 0 )

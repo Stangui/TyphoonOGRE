@@ -6,7 +6,7 @@ namespace TyphoonEngine
 {
 	class IGameState;
 
-	class StereoGraphicsSystem : public Renderer
+	class StereoGraphicsSystem : public GraphicsSystem
 	{
 		Ogre::SceneNode* mCamerasNode;
 		Ogre::Camera* mEyeCameras[ 2 ];
