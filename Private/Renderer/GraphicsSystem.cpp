@@ -2,11 +2,11 @@
 #include "GraphicsSystem.h"
 #include "TyphoonCore.h"
 
-#include "GameState.h"
+#include "IBaseState.h"
 #if OGRE_PLATFORM != OGRE_PLATFORM_APPLE_IOS
 #include "SdlInputHandler.h"
 #endif
-#include "GameEntity.h"
+#include "GraphicsObject.h"
 
 #include "OgreRoot.h"
 #include "OgreException.h"
@@ -39,9 +39,7 @@
 
 #include "OgreLogManager.h"
 
-#if OGRE_USE_SDL2
 #include <SDL_syswm.h>
-#endif
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE || OGRE_PLATFORM == OGRE_PLATFORM_APPLE_IOS
 #include "OSX/macUtils.h"
@@ -59,13 +57,10 @@ namespace TyphoonEngine
 
     static const char* CONFIGS_FOLDER = ".\\Configs\\";
   
-    GraphicsSystem::GraphicsSystem( IGameState* InitialState, Ogre::ColourValue backgroundColour )
-        : BaseSystem( InitialState )
-        , mLogicSystem( nullptr )
-#if OGRE_USE_SDL2
+    GraphicsSystem::GraphicsSystem( IBaseState* InitialState, Ogre::ColourValue backgroundColour )
+        : mLogicSystem( nullptr )
         , mSdlWindow( 0 )
         , mInputHandler( 0 )
-#endif
         , mRoot( nullptr )
         , mRenderWindow( nullptr )
         , mSceneManager( nullptr )
@@ -131,8 +126,6 @@ namespace TyphoonEngine
     //-----------------------------------------------------------------------------------
     void GraphicsSystem::Init()
     {
-
-#if OGRE_USE_SDL2
         if ( SDL_Init(
             SDL_INIT_TIMER|
             SDL_INIT_VIDEO|
@@ -145,7 +138,6 @@ namespace TyphoonEngine
                 "Cannot initialize SDL2!",
                 "GraphicsSystem::initialize" );
         }
-#endif
 
         Ogre::String pluginsPath;
         // only use plugins.cfg if not static
@@ -210,7 +202,6 @@ namespace TyphoonEngine
 
         Ogre::NameValuePairList params;
         bool fullscreen = Ogre::StringConverter::parseBool( cfgOpts[ "Full Screen" ].currentValue );
-#if OGRE_USE_SDL2
         int screen = 0;
         int posX = SDL_WINDOWPOS_CENTERED_DISPLAY( screen );
         int posY = SDL_WINDOWPOS_CENTERED_DISPLAY( screen );
@@ -274,7 +265,6 @@ namespace TyphoonEngine
 #else
         params.insert( std::make_pair( "parentWindowHandle", winHandle ) );
 #endif
-#endif
 
         params.insert( std::make_pair( "title", windowTitle ) );
         params.insert( std::make_pair( "gamma", "true" ) );
@@ -291,11 +281,12 @@ namespace TyphoonEngine
         CreateCamera();
         mWorkspace = SetupCompositor();
 
-#if OGRE_USE_SDL2
-        mInputHandler = new SdlInputHandler( mSdlWindow, m_CurrentState, m_CurrentState, m_CurrentState );
-#endif
+        mInputHandler = new SdlInputHandler( mSdlWindow, mGraphicsState, mGraphicsState, mGraphicsState );
 
-        BaseSystem::Init();
+        if ( mGraphicsState )
+        {
+            mGraphicsState->Init();
+        }
 
 #if OGRE_PROFILING
         Ogre::Profiler::getSingleton().setEnabled( true );
@@ -368,9 +359,56 @@ namespace TyphoonEngine
     }
 
     //-----------------------------------------------------------------------------------
+    void GraphicsSystem::CreateScene( void )
+    {
+        if ( mGraphicsState )
+        {
+            mGraphicsState->CreateScene();
+        }
+    }
+
+    //-----------------------------------------------------------------------------------
+    void GraphicsSystem::BeginFrameParallel( void )
+    {
+        this->ProcessIncomingMessages();
+    }
+
+    //-----------------------------------------------------------------------------------
+    void GraphicsSystem::FinishFrameParallel( void )
+    {
+        if ( mGraphicsState )
+        {
+            mGraphicsState->FinishFrameParallel();
+        }
+
+        this->FlushQueuedMessages();
+    }
+
+    //-----------------------------------------------------------------------------------
+    void GraphicsSystem::FinishFrame( void )
+    {
+        if ( mGraphicsState )
+        {
+            mGraphicsState->FinishFrame();
+        }
+    }
+
+    //-----------------------------------------------------------------------------------
+    void GraphicsSystem::DestroyScene( void )
+    {
+        if ( mGraphicsState )
+        {
+            mGraphicsState->DestroyScene();
+        }
+    }
+
+    //-----------------------------------------------------------------------------------
     void GraphicsSystem::Shutdown( void )
     {
-        BaseSystem::Shutdown();
+        if ( mGraphicsState )
+        {
+            mGraphicsState->Shutdown();
+        }
 
         SaveHlmsDiskCache();
 
@@ -380,14 +418,11 @@ namespace TyphoonEngine
         OGRE_DELETE mOverlaySystem;
         mOverlaySystem = nullptr;
 
-#if OGRE_USE_SDL2
         SAFE_DELETE( mInputHandler );
-#endif
 
         OGRE_DELETE mRoot;
         mRoot = nullptr;
 
-#if OGRE_USE_SDL2
         if ( mSdlWindow )
         {
             // Restore desktop resolution on exit
@@ -397,7 +432,6 @@ namespace TyphoonEngine
         }
 
         SDL_Quit();
-#endif
     }
     
     //-----------------------------------------------------------------------------------
@@ -425,7 +459,10 @@ namespace TyphoonEngine
         }
 #endif
 
-        BaseSystem::Update( timeSinceLast );
+        if ( mGraphicsState )
+        {
+            mGraphicsState->Update( timeSinceLast );
+        }
 
         if ( bShowDebug )
         {
@@ -439,7 +476,6 @@ namespace TyphoonEngine
     }
     
     //-----------------------------------------------------------------------------------
-#if OGRE_USE_SDL2
     void GraphicsSystem::HandleWindowEvent( const SDL_Event& evt )
     {
         switch ( evt.window.event )
@@ -470,7 +506,6 @@ namespace TyphoonEngine
             break;
         }
     }
-#endif
     
     //-----------------------------------------------------------------------------------
     void GraphicsSystem::ProcessIncomingMessage( Mq::MessageId messageId, const void* data )
@@ -498,10 +533,10 @@ namespace TyphoonEngine
         }
         break;
         case Mq::GAME_ENTITY_ADDED:
-            GameEntityAdded( reinterpret_cast< const GameEntityManager::CreatedGameEntity* >( data ) );
+            GameEntityAdded( reinterpret_cast< const GraphicsObjectManager::CreatedGameEntity* >( data ) );
             break;
         case Mq::GAME_ENTITY_REMOVED:
-            GameEntityRemoved( *reinterpret_cast< GameEntity* const* >( data ) );
+            GameEntityRemoved( *reinterpret_cast< GraphicsObject* const* >( data ) );
             break;
         case Mq::GAME_ENTITY_SCHEDULED_FOR_REMOVAL_SLOT:
             //Acknowledge/notify back that we're done with this slot.
@@ -853,19 +888,19 @@ namespace TyphoonEngine
     //-----------------------------------------------------------------------------------
     struct GameEntityCmp
     {
-        bool operator () ( const GameEntity* _l, const Ogre::Matrix4* RESTRICT_ALIAS _r ) const
+        bool operator () ( const GraphicsObject* _l, const Ogre::Matrix4* RESTRICT_ALIAS _r ) const
         {
             const Ogre::Transform& transform = _l->mSceneNode->_getTransform();
             return &transform.mDerivedTransform[ transform.mIndex ]<_r;
         }
 
-        bool operator () ( const Ogre::Matrix4* RESTRICT_ALIAS _r, const GameEntity* _l ) const
+        bool operator () ( const Ogre::Matrix4* RESTRICT_ALIAS _r, const GraphicsObject* _l ) const
         {
             const Ogre::Transform& transform = _l->mSceneNode->_getTransform();
             return _r<&transform.mDerivedTransform[ transform.mIndex ];
         }
 
-        bool operator () ( const GameEntity* _l, const GameEntity* _r ) const
+        bool operator () ( const GraphicsObject* _l, const GraphicsObject* _r ) const
         {
             const Ogre::Transform& lTransform = _l->mSceneNode->_getTransform();
             const Ogre::Transform& rTransform = _r->mSceneNode->_getTransform();
@@ -874,7 +909,7 @@ namespace TyphoonEngine
     };
     
     //-----------------------------------------------------------------------------------
-    void GraphicsSystem::GameEntityAdded( const GameEntityManager::CreatedGameEntity* cge )
+    void GraphicsSystem::GameEntityAdded( const GraphicsObjectManager::CreatedGameEntity* cge )
     {
         Ogre::SceneNode* sceneNode = mSceneManager->getRootSceneNode( cge->m_gameEntity->mType )->
             createChildSceneNode( cge->m_gameEntity->mType,
@@ -916,7 +951,7 @@ namespace TyphoonEngine
     }
     
     //----------------------------------------------------------------------------------
-    void GraphicsSystem::GameEntityRemoved( GameEntity* toRemove )
+    void GraphicsSystem::GameEntityRemoved( GraphicsObject* toRemove )
     {
         const Ogre::Transform& transform = toRemove->mSceneNode->_getTransform();
         GameEntityVec::iterator itGameEntity = std::lower_bound(
@@ -962,7 +997,7 @@ namespace TyphoonEngine
         GameEntityVec::const_iterator end = mThreadGameEntityToUpdate->begin() + std::min( toAdvance+objsPerThread, mThreadGameEntityToUpdate->size() );
         while ( itor!=end )
         {
-            GameEntity* gEnt = *itor;
+            GraphicsObject* gEnt = *itor;
             Ogre::Vector3 interpVec = Ogre::Math::lerp( gEnt->mTransform[ prevIdx ]->vPos, gEnt->mTransform[ currIdx ]->vPos, mThreadWeight );
             gEnt->mSceneNode->setPosition( interpVec );
 

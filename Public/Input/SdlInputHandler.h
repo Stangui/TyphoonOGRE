@@ -3,11 +3,9 @@
 //sdlinputwrapper files as base under the MIT license
 #pragma once 
 
-#include "BaseSystem.h"
+#include "IBaseSystem.h"
 #include "OgrePrerequisites.h"
 #include "SdlEmulationLayer.h"
-
-#if OGRE_USE_SDL2
 
 #include <SDL.h>
 
@@ -20,8 +18,8 @@ namespace TyphoonEngine
     class SdlInputHandler
     {
         SDL_Window*         mSdlWindow;
-        BaseSystem*         mGraphicsSystem;
-        BaseSystem*         mLogicSystem;
+        IBaseSystem*        mGraphicsSystem;
+        IBaseSystem*        mLogicSystem;
         MouseListener*      mMouseListener;
         KeyboardListener*   mKeyboardListener;
         JoystickListener*   mJoystickListener;
@@ -87,5 +85,3 @@ namespace TyphoonEngine
         void setMouseVisible( bool visible );
     };
 }
-
-#endif

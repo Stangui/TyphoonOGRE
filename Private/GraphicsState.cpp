@@ -1,4 +1,4 @@
-#include "GraphicsGameState.h"
+#include "GraphicsState.h"
 #include "GraphicsSystem.h"
 
 #include "OgreSceneManager.h"
@@ -9,7 +9,7 @@
 namespace TyphoonEngine
 {
 
-	GraphicsGameState::GraphicsGameState() : mGraphicsSystem( nullptr )
+	GraphicsGameState::GraphicsGameState() : m_GraphicsSystem( nullptr )
 	{
 	}
 
@@ -22,8 +22,8 @@ namespace TyphoonEngine
 	//-----------------------------------------------------------------------------------
 	void GraphicsGameState::Update( float timeSinceLast )
 	{
-		float weight = std::min( 1.0f, static_cast<float>(mGraphicsSystem->GetAccumTimeSinceLastLogicFrame() / TyphoonEngine::LOGIC_UPDATE_TIME ) );
-		mGraphicsSystem->UpdateGameEntities( mGraphicsSystem->GetGameEntities( Ogre::SCENE_DYNAMIC ), weight );
+		float weight = std::min( 1.0f, static_cast<float>(m_GraphicsSystem->GetAccumTimeSinceLastLogicFrame() / TyphoonEngine::LOGIC_UPDATE_TIME ) );
+		m_GraphicsSystem->UpdateGameEntities( m_GraphicsSystem->GetGameEntities( Ogre::SCENE_DYNAMIC ), weight );
 	}
 
 	//-----------------------------------------------------------------------------------
@@ -31,12 +31,12 @@ namespace TyphoonEngine
 	{
 		if ( arg.keysym.scancode == SDL_SCANCODE_ESCAPE )
 		{
-			mGraphicsSystem->SetQuit();
+			m_GraphicsSystem->SetQuit();
 		}
 
 		if ( arg.keysym.scancode == SDL_SCANCODE_D && ( arg.keysym.mod & ( KMOD_LCTRL|KMOD_RCTRL ) ) )
 		{
-			mGraphicsSystem->ShowDebugText( !mGraphicsSystem->IsDebugTextVisible() );
+			m_GraphicsSystem->ShowDebugText( !m_GraphicsSystem->IsDebugTextVisible() );
 		}
 	}
 }

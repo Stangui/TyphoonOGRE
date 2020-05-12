@@ -1,5 +1,5 @@
-#include "BaseSystem.h"
-#include "GameState.h"
+#include "IBaseSystem.h"
+#include "IGameState.h"
 
 namespace TyphoonEngine
 {

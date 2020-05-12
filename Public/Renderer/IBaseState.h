@@ -8,12 +8,12 @@ namespace TyphoonEngine
 	/**
 	* Game state interface
 	*/
-    class IGameState : public MouseListener, public KeyboardListener, public JoystickListener
+    class IBaseState : public MouseListener, public KeyboardListener, public JoystickListener
     {
     public:
         
-		IGameState() = default;
-		virtual ~IGameState() {}
+		IBaseState() = default;
+		virtual ~IBaseState() = default;
 
 		virtual void Init( void ) = 0;
 		virtual void Shutdown( void ) = 0;

@@ -1,5 +1,5 @@
 #include "StereoGraphicsSystem.h"
-#include "GameState.h"
+#include "IBaseState.h"
 #include <OgreSceneManager.h>
 #include <OgreCamera.h>
 #include <OgreRoot.h>
@@ -92,7 +92,7 @@ namespace TyphoonEngine
 	}
 
 	//-------------------------------------------------------------------------------
-	StereoGraphicsSystem::StereoGraphicsSystem( IGameState* GameState ) : GraphicsSystem( GameState )
+	StereoGraphicsSystem::StereoGraphicsSystem( IBaseState* GameState ) : GraphicsSystem( GameState )
 	{
 	}
 };

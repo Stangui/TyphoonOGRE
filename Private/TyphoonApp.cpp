@@ -6,12 +6,11 @@
 #include <OgreTimer.h>
 
 #include "GraphicsSystem.h"
+#include "GraphicsState.h"
+#include "GraphicsObjectManager.h"
 #include "LogicSystem.h"
-#include "GraphicsGameState.h"
-#include "GameEntityManager.h"
-#include "LogicGameState.h"
-#include "YieldTimer.h"
-
+#include "LogicState.h"
+#include "Threading/YieldTimer.h"
 #include "Threading/OgreThreads.h"
 #include "Threading/OgreBarrier.h"
 
@@ -185,7 +184,7 @@ namespace TyphoonEngine
         m_LogicGameState = new AppLogicState();
         m_LogicSystem = new LogicSystem( m_LogicGameState );
         m_Barriers = new Ogre::Barrier( 2 );
-        m_GameEntityManager = new GameEntityManager( m_GraphicsSystem, m_LogicSystem );
+        m_GameEntityManager = new GraphicsObjectManager( m_GraphicsSystem, m_LogicSystem );
 
         m_GraphicsGameState->SetGraphicSystem( m_GraphicsSystem );
         m_LogicSystem->SetGraphicSystem( m_GraphicsSystem );

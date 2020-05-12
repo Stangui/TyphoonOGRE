@@ -1,6 +1,6 @@
-#include "LogicGameState.h"
+#include "LogicState.h"
 #include "LogicSystem.h"
-#include "GameEntityManager.h"
+#include "GraphicsObjectManager.h"
 #include "TyphoonCore.h"
 
 #include "OgreVector3.h"
@@ -25,7 +25,7 @@ namespace TyphoonEngine
     {
         const Ogre::Vector3 origin( 0.0f, 0.0f, 0.0f );
 
-        if ( GameEntityManager* geMgr = mLogicSystem->GetGameEntityManager() )
+        if ( GraphicsObjectManager* geMgr = mLogicSystem->GetGraphicsObjectManager() )
         {
             mCubeMoDef = new MovableObjectDefinition();
             mCubeMoDef->meshName = "Cube_d.mesh";

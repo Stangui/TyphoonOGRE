@@ -12,12 +12,6 @@ namespace Ogre
 namespace TyphoonEngine
 {
 
-    class GameEntityManager;
-    class GraphicsGameState;    
-    class GraphicsSystem;
-    class AppLogicState;
-    class LogicSystem;
-
     struct ThreadData
     {
         GraphicsSystem*   m_GraphicsSystem;
@@ -43,12 +37,12 @@ namespace TyphoonEngine
 
     private:
 
-        GameEntityManager*  m_GameEntityManager;
-        GraphicsGameState*  m_GraphicsGameState;
-        GraphicsSystem*       m_GraphicsSystem;
-        AppLogicState*      m_LogicGameState;
-        LogicSystem*        m_LogicSystem;
-        Ogre::Barrier*      m_Barriers;
-        ThreadData          m_ThreadData;
+        GraphicsObjectManager*  m_GameEntityManager;
+        GraphicsGameState*      m_GraphicsGameState;
+        GraphicsSystem*         m_GraphicsSystem;
+        AppLogicState*          m_LogicGameState;
+        LogicSystem*            m_LogicSystem;
+        Ogre::Barrier*          m_Barriers;
+        ThreadData              m_ThreadData;
     };
 }

@@ -11,8 +11,8 @@ namespace TyphoonEngine
 
     class GraphicsSystem;
     class LogicSystem;
-    class GameEntityManager;
+    class GraphicsObjectManager;
     class GraphicsGameState;
-    class LogicGameState;
-    class GameState;
+    class AppLogicState;
+    class IBaseState;
 }

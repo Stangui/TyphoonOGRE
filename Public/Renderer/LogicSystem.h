@@ -1,18 +1,20 @@
 #pragma once 
 
-#include "BaseSystem.h"
+#include "IBaseSystem.h"
 #include "OgrePrerequisites.h"
 
 namespace TyphoonEngine
 {
-    class GameEntityManager;
+    class GraphicsObjectManager;
+    class IBaseState;
 
-    class LogicSystem : public BaseSystem
+    class LogicSystem : public IBaseSystem
     {
     protected:
 
-        BaseSystem* m_GraphicsSystem;
-        GameEntityManager* m_GameEntityManager;
+        IBaseSystem* m_GraphicsSystem;
+        IBaseState* m_LogicState;
+        GraphicsObjectManager* m_GameEntityManager;
         Ogre::uint32 m_CurrentTransformIdx;
         std::deque<Ogre::uint32> m_AvailableTransformIdx;
 
@@ -21,23 +23,31 @@ namespace TyphoonEngine
 
     public:
 
-        LogicSystem( IGameState* InitialState );
+        LogicSystem( IBaseState* InitialState );
         virtual ~LogicSystem();
 
-        // Overrides - IBaseSystem interface
-        virtual void FinishFrameParallel() override;
 
-        inline void SetGraphicSystem( BaseSystem* GraphicsSystem )
+        // IBaseSystem interface
+        virtual void Init( void ) override;
+        virtual void CreateScene( void ) override;
+        virtual void BeginFrameParallel( void ) override;
+        virtual void FinishFrameParallel( void ) override;
+        virtual void FinishFrame( void ) override;
+        virtual void Update( float deltaTime ) override;
+        virtual void DestroyScene( void ) override;
+        virtual void Shutdown( void ) override;
+
+        inline void SetGraphicSystem( IBaseSystem* GraphicsSystem )
         {
             m_GraphicsSystem = GraphicsSystem;
         }
 
-        inline void SetGameEntityManager( GameEntityManager* GEMgr )
+        inline void SetGraphicsObjectManager( GraphicsObjectManager* GEMgr )
         {
             m_GameEntityManager = GEMgr;
         }
 
-        inline GameEntityManager* GetGameEntityManager( void ) const
+        inline GraphicsObjectManager* GetGraphicsObjectManager( void ) const
         {
             return m_GameEntityManager;
         }

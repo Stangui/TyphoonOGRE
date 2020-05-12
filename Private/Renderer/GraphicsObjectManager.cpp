@@ -1,6 +1,6 @@
 
-#include "GameEntityManager.h"
-#include "GameEntity.h"
+#include "GraphicsObjectManager.h"
+#include "GraphicsObject.h"
 
 #include "LogicSystem.h"
 
@@ -8,18 +8,18 @@ namespace TyphoonEngine
 {
     const size_t cNumTransforms = 250;
 
-    GameEntityManager::GameEntityManager( Mq::MessageQueueSystem* graphicsSystem, LogicSystem* logicSystem ) 
+    GraphicsObjectManager::GraphicsObjectManager( Mq::MessageQueueSystem* graphicsSystem, LogicSystem* logicSystem )
         : mCurrentId( 0 )
         , mScheduledForRemovalCurrentSlot( (size_t)-1 )
         , mGraphicsSystem( graphicsSystem )
         , mLogicSystem( logicSystem )
     {
-        mLogicSystem->SetGameEntityManager( this );
+        mLogicSystem->SetGraphicsObjectManager( this );
     }
     //-----------------------------------------------------------------------------------
-    GameEntityManager::~GameEntityManager()
+    GraphicsObjectManager::~GraphicsObjectManager()
     {
-        mLogicSystem->SetGameEntityManager( nullptr );
+        mLogicSystem->SetGraphicsObjectManager( nullptr );
 
         {
             GameEntityVecVec::iterator itor = mScheduledForRemoval.begin();
@@ -33,8 +33,8 @@ namespace TyphoonEngine
         destroyAllGameEntitiesIn( mGameEntities[Ogre::SCENE_DYNAMIC] );
         destroyAllGameEntitiesIn( mGameEntities[Ogre::SCENE_STATIC] );
 
-        std::vector<GameEntityTransform*>::const_iterator itor = mTransformBuffers.begin();
-        std::vector<GameEntityTransform*>::const_iterator end  = mTransformBuffers.end();
+        std::vector<ObjectTransform*>::const_iterator itor = mTransformBuffers.begin();
+        std::vector<ObjectTransform*>::const_iterator end  = mTransformBuffers.end();
 
         while( itor != end )
         {
@@ -46,13 +46,13 @@ namespace TyphoonEngine
         mAvailableTransforms.clear();
     }
     //-----------------------------------------------------------------------------------
-    GameEntity* GameEntityManager::AddGameEntity( Ogre::SceneMemoryMgrTypes type,
+    GraphicsObject* GraphicsObjectManager::AddGameEntity( Ogre::SceneMemoryMgrTypes type,
                                                   const MovableObjectDefinition *moDefinition,
                                                   const Ogre::Vector3 &initialPos,
                                                   const Ogre::Quaternion &initialRot,
                                                   const Ogre::Vector3 &initialScale )
     {
-        GameEntity *gameEntity = new GameEntity( mCurrentId++, moDefinition, type );
+        GraphicsObject*gameEntity = new GraphicsObject( mCurrentId++, moDefinition, type );
 
         CreatedGameEntity cge;
         cge.m_gameEntity  = gameEntity;
@@ -67,7 +67,7 @@ namespace TyphoonEngine
         for( int i=0; i<NUM_GAME_ENTITY_BUFFERS; ++i )
         {
             gameEntity->mTransform[i] = mTransformBuffers[bufferIdx] + slot + cNumTransforms * i;
-            memcpy( gameEntity->mTransform[i], &cge.m_initialTransform, sizeof(GameEntityTransform) );
+            memcpy( gameEntity->mTransform[i], &cge.m_initialTransform, sizeof(ObjectTransform) );
         }
 
         mGameEntities[type].push_back( gameEntity );
@@ -76,19 +76,19 @@ namespace TyphoonEngine
         return gameEntity;
     }
     //-----------------------------------------------------------------------------------
-    void GameEntityManager::RemoveGameEntity( GameEntity *toRemove )
+    void GraphicsObjectManager::RemoveGameEntity( GraphicsObject *toRemove )
     {
         Ogre::uint32 slot = getScheduledForRemovalAvailableSlot();
         mScheduledForRemoval[slot].push_back( toRemove );
         GameEntityVec::iterator itor = std::lower_bound( mGameEntities[toRemove->mType].begin(),
                                                          mGameEntities[toRemove->mType].end(),
-                                                         toRemove, GameEntity::OrderById );
+                                                         toRemove, GraphicsObject::OrderById );
         assert( itor != mGameEntities[toRemove->mType].end() && *itor == toRemove );
         mGameEntities[toRemove->mType].erase( itor );
         mLogicSystem->QueueSendMessage( mGraphicsSystem, Mq::GAME_ENTITY_REMOVED, toRemove );
     }
     //-----------------------------------------------------------------------------------
-    void GameEntityManager::_notifyGameEntitiesRemoved( size_t slot )
+    void GraphicsObjectManager::_notifyGameEntitiesRemoved( size_t slot )
     {
         destroyAllGameEntitiesIn( mScheduledForRemoval[slot] );
 
@@ -96,7 +96,7 @@ namespace TyphoonEngine
         mScheduledForRemovalAvailableSlots.push_back( slot );
     }
     //-----------------------------------------------------------------------------------
-    void GameEntityManager::destroyAllGameEntitiesIn( GameEntityVec &container )
+    void GraphicsObjectManager::destroyAllGameEntitiesIn( GameEntityVec &container )
     {
         GameEntityVec::const_iterator itor = container.begin();
         GameEntityVec::const_iterator end  = container.end();
@@ -109,12 +109,12 @@ namespace TyphoonEngine
         }
     }
     //-----------------------------------------------------------------------------------
-    void GameEntityManager::aquireTransformSlot( size_t &outSlot, size_t &outBufferIdx )
+    void GraphicsObjectManager::aquireTransformSlot( size_t &outSlot, size_t &outBufferIdx )
     {
         if( mAvailableTransforms.empty() )
         {
-            GameEntityTransform *buffer = reinterpret_cast<GameEntityTransform*>( OGRE_MALLOC_SIMD(
-                        sizeof(GameEntityTransform) * cNumTransforms * NUM_GAME_ENTITY_BUFFERS,
+            ObjectTransform *buffer = reinterpret_cast<ObjectTransform*>( OGRE_MALLOC_SIMD(
+                        sizeof(ObjectTransform) * cNumTransforms * NUM_GAME_ENTITY_BUFFERS,
                         Ogre::MEMCATEGORY_SCENE_OBJECTS ) );
             mTransformBuffers.push_back( buffer );
             mAvailableTransforms.push_back( Region( 0, cNumTransforms, mTransformBuffers.size() - 1 ) );
@@ -129,7 +129,7 @@ namespace TyphoonEngine
             mAvailableTransforms.pop_back();
     }
     //-----------------------------------------------------------------------------------
-    void GameEntityManager::releaseTransformSlot( size_t bufferIdx, GameEntityTransform *transform )
+    void GraphicsObjectManager::releaseTransformSlot( size_t bufferIdx, ObjectTransform *transform )
     {
         //Try to prevent a lot of fragmentation by adding the slot to an existing region.
         //It won't fully avoid it, but this is good/simple enough. If you want to fully
@@ -163,7 +163,7 @@ namespace TyphoonEngine
         }
     }
     //-----------------------------------------------------------------------------------
-    Ogre::uint32 GameEntityManager::getScheduledForRemovalAvailableSlot(void)
+    Ogre::uint32 GraphicsObjectManager::getScheduledForRemovalAvailableSlot(void)
     {
         if( mScheduledForRemovalCurrentSlot >= mScheduledForRemoval.size() )
         {
@@ -180,7 +180,7 @@ namespace TyphoonEngine
         return static_cast<Ogre::uint32>(mScheduledForRemovalCurrentSlot);
     }
     //-----------------------------------------------------------------------------------
-    void GameEntityManager::FinishFrameParallel(void)
+    void GraphicsObjectManager::FinishFrameParallel(void)
     {
         if( mScheduledForRemovalCurrentSlot < mScheduledForRemoval.size() )
         {

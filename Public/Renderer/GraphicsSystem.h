@@ -1,7 +1,7 @@
 #pragma once 
 
-#include "BaseSystem.h"
-#include "GameEntityManager.h"
+#include "IBaseSystem.h"
+#include "GraphicsObjectManager.h"
 #include "System/StaticPluginLoader.h"
 #include "OgrePrerequisites.h"
 #include "OgreColourValue.h"
@@ -12,24 +12,21 @@
 #include "Overlay/OgreOverlaySystem.h"
 #include "Overlay/OgreTextAreaOverlayElement.h"
 
-#if OGRE_USE_SDL2
 #include <SDL.h>
-#endif
 
 namespace TyphoonEngine
 {
     class SdlInputHandler;
+    class IBaseState;
 
-    class GraphicsSystem : public BaseSystem, public Ogre::UniformScalableTask
+    class GraphicsSystem : public IBaseSystem, public Ogre::UniformScalableTask
     {
     protected:
-        BaseSystem*                mLogicSystem;
-
-#if OGRE_USE_SDL2
+        
+        IBaseSystem*                mLogicSystem;
+        IBaseState*                 mGraphicsState;
         SDL_Window*                 mSdlWindow;
         SdlInputHandler*            mInputHandler;
-#endif
-
         Ogre::Root*                 mRoot;
         Ogre::RenderWindow*         mRenderWindow;
         Ogre::SceneManager*         mSceneManager;
@@ -61,11 +58,7 @@ namespace TyphoonEngine
         void createDebugTextOverlay( void );
         void generateDebugText( float timeSinceLast );
         bool ParseConfigs( const char* configFilepath );
-
-#if OGRE_USE_SDL2
         void HandleWindowEvent( const SDL_Event& evt );
-#endif
-
         bool IsWriteAccessFolder( const Ogre::String& folderPath, const Ogre::String& fileToSave );
 
         /// @see MessageQueueSystem::processIncomingMessage
@@ -94,23 +87,28 @@ namespace TyphoonEngine
         {
         }
 
-        void GameEntityAdded( const GameEntityManager::CreatedGameEntity* createdGameEntity );
-        void GameEntityRemoved( GameEntity* toRemove );
+        void GameEntityAdded( const GraphicsObjectManager::CreatedGameEntity* createdGameEntity );
+        void GameEntityRemoved( GraphicsObject* toRemove );
 
     public:
 
-        GraphicsSystem( IGameState* GameState, Ogre::ColourValue backgroundColour = Ogre::ColourValue( 0.2f, 0.4f, 0.6f ) );
+        GraphicsSystem( IBaseState* GameState, Ogre::ColourValue backgroundColour = Ogre::ColourValue( 0.2f, 0.4f, 0.6f ) );
         virtual ~GraphicsSystem() override;
 
-        inline void SetLogicSystem( BaseSystem* logicSystem )
+        inline void SetLogicSystem( IBaseSystem* logicSystem )
         {
             mLogicSystem = logicSystem;
         }
 
         // IBaseSystem interface
         virtual void Init( void ) override;
-        virtual void Shutdown( void ) override;
+        virtual void CreateScene( void ) override;
+        virtual void BeginFrameParallel( void ) override;
+        virtual void FinishFrameParallel( void ) override;
+        virtual void FinishFrame( void ) override;
         virtual void Update( float deltaTime ) override;
+        virtual void DestroyScene( void ) override;
+        virtual void Shutdown( void ) override;
 
         /** Updates the SceneNodes of all the game entities in the container,
             interpolating them according to weight, reading the transforms from
@@ -132,12 +130,10 @@ namespace TyphoonEngine
             return mGameEntities[ type ];
         }
 
-#if OGRE_USE_SDL2
         inline SdlInputHandler* GetInputHandler( void )
         {
             return mInputHandler;
         }
-#endif
 
         inline void SetQuit( void )
         {

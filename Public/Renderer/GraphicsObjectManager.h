@@ -1,22 +1,22 @@
 #pragma once 
 
 #include "Threading/MessageQueueSystem.h"
-#include "GameEntity.h"
+#include "GraphicsObject.h"
 
 namespace TyphoonEngine
 {
     class GraphicsSystem;
     class LogicSystem;
 
-    class GameEntityManager
+    class GraphicsObjectManager
     {
     
 	public:
 
         struct CreatedGameEntity
         {
-            GameEntity*			m_gameEntity;
-            GameEntityTransform m_initialTransform;
+            GraphicsObject*			m_gameEntity;
+            ObjectTransform m_initialTransform;
         };
 
         typedef std::vector<GameEntityVec> GameEntityVecVec;
@@ -41,7 +41,7 @@ namespace TyphoonEngine
         Ogre::uint32    mCurrentId;
         GameEntityVec   mGameEntities[Ogre::NUM_SCENE_MEMORY_MANAGER_TYPES];
 
-        std::vector<GameEntityTransform*>   mTransformBuffers;
+        std::vector<ObjectTransform*>   mTransformBuffers;
         std::vector<Region>                 mAvailableTransforms;
 
         GameEntityVecVec    mScheduledForRemoval;
@@ -55,12 +55,12 @@ namespace TyphoonEngine
         void destroyAllGameEntitiesIn( GameEntityVec &container );
 
         void aquireTransformSlot( size_t &outSlot, size_t &outBufferIdx );
-        void releaseTransformSlot( size_t bufferIdx, GameEntityTransform *transform );
+        void releaseTransformSlot( size_t bufferIdx, ObjectTransform *transform );
 
     public:
 
-        GameEntityManager( Mq::MessageQueueSystem* graphicsSystem, LogicSystem* logicSystem );
-        ~GameEntityManager();
+        GraphicsObjectManager( Mq::MessageQueueSystem* graphicsSystem, LogicSystem* logicSystem );
+        ~GraphicsObjectManager();
 
         /** Creates a GameEntity, adding it to the world, and scheduling for the Graphics
             thread to create the appropiate SceneNode and Item pointers.
@@ -79,7 +79,7 @@ namespace TyphoonEngine
             not all of its pointers may filled yet (the ones that are not meant to
             be used by the logic thread)
         */
-        GameEntity* AddGameEntity( Ogre::SceneMemoryMgrTypes type,
+        GraphicsObject* AddGameEntity( Ogre::SceneMemoryMgrTypes type,
                                    const MovableObjectDefinition *moDefinition,
                                    const Ogre::Vector3 &initialPos,
                                    const Ogre::Quaternion &initialRot,
@@ -90,7 +90,7 @@ namespace TyphoonEngine
             It will be destroyed after the Render thread confirms it is done with it
             (via a Mq::GAME_ENTITY_SCHEDULED_FOR_REMOVAL_SLOT message)
         */
-        void RemoveGameEntity( GameEntity* toRemove );
+        void RemoveGameEntity( GraphicsObject* toRemove );
 
         /// Must be called by LogicSystem when Mq::GAME_ENTITY_SCHEDULED_FOR_REMOVAL_SLOT message arrives
         void _notifyGameEntitiesRemoved( size_t slot );

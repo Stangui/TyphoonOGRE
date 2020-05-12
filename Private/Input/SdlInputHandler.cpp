@@ -5,8 +5,6 @@
 #include "SdlInputHandler.h"
 #include "InputListeners.h"
 
-#if OGRE_USE_SDL2
-
 #include <SDL_syswm.h>
 
 namespace TyphoonEngine
@@ -267,4 +265,3 @@ namespace TyphoonEngine
         return false;
     }
 }
-#endif

@@ -4,7 +4,7 @@
 
 namespace TyphoonEngine
 {
-	class IGameState;
+	class IBaseState;
 
 	class StereoGraphicsSystem : public GraphicsSystem
 	{
@@ -17,6 +17,6 @@ namespace TyphoonEngine
 
 	public:
 
-		StereoGraphicsSystem( IGameState* GameState );
+		StereoGraphicsSystem( IBaseState* GameState );
 	};
 }
