@@ -6,50 +6,63 @@
 #include "OgreVector3.h"
 #include "OgreResourceGroupManager.h"
 
+#define NUM_CUBES 6
+
 namespace TyphoonEngine
 {
-    LogicState::LogicState()
-        : mDisplacement( 0 )
-        , mCubeEntity( 0 )
-        , mCubeMoDef( 0 )
-        , mLogicSystem( 0 )
+    LogicState::LogicState() : mLogicSystem( 0 )
     {
     }
+    
     //-----------------------------------------------------------------------------------
     LogicState::~LogicState()
     {
-        SAFE_DELETE( mCubeMoDef );
+        for ( const auto* def:mCubeMoDefs )
+        {
+            SAFE_DELETE( def );
+        }
     }
+    
     //-----------------------------------------------------------------------------------
     void LogicState::CreateScene( void )
     {
-        const Ogre::Vector3 origin( 0.0f, 0.0f, 0.0f );
-
         if ( GraphicsObjectManager* geMgr = mLogicSystem->GetGraphicsObjectManager() )
         {
-            mCubeMoDef = new MovableObjectDefinition();
-            mCubeMoDef->meshName = "Cube_d.mesh";
-            mCubeMoDef->resourceGroup = Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME;
-            mCubeMoDef->moType = MoTypeItem;
+            const float step = 20.f/( NUM_CUBES-1 );
+            for ( int i = 0; i<NUM_CUBES; ++i )
+            {
+                ItemDefinition* def = new ItemDefinition();
+                def->meshName = "Cube_d.mesh";
+                def->resourceGroup = Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME;
+                def->moType = MoTypeItem;
 
-            mCubeEntity = geMgr->AddGameEntity(
-                Ogre::SCENE_DYNAMIC,
-                mCubeMoDef,
-                origin,
-                Ogre::Quaternion::IDENTITY,
-                Ogre::Vector3::UNIT_SCALE
-            );
+                mCubeMoDefs.push_back( def );
+
+                mCubeEntities.push_back( geMgr->AddGameEntity(
+                    Ogre::SCENE_DYNAMIC,
+                    def,
+                    Ogre::Vector3(-10.f + step * i, 0.f, 0.f),
+                    Ogre::Quaternion::IDENTITY,
+                    Ogre::Vector3::UNIT_SCALE
+                ));
+            }
         }
     }
+    
     //-----------------------------------------------------------------------------------
     void LogicState::Update( float timeSinceLast )
     {
-        const Ogre::Vector3 origin( -10.0f, 0.0f, 0.0f );
-
-        mDisplacement += timeSinceLast*10.0f;
-        mDisplacement = fmodf( mDisplacement, 20.0f );
-
-        const size_t currIdx = mLogicSystem->GetCurrentTransformIdx();
-        mCubeEntity->mTransform[ currIdx ]->vPos = origin+Ogre::Vector3::UNIT_X*mDisplacement;
+        for ( auto* ent:mCubeEntities )
+        {
+            const size_t currIdx = mLogicSystem->GetCurrentTransformIdx();
+            const size_t prevIdx = currIdx==0 ? NUM_GAME_ENTITY_BUFFERS-1 : currIdx-1;
+            Ogre::Vector3& cPos = ent->mTransform[ currIdx ]->vPos;
+            Ogre::Vector3& pPos = ent->mTransform[ prevIdx ]->vPos;
+            cPos = pPos + Ogre::Vector3::UNIT_X * timeSinceLast;
+            if ( cPos.x>10.f )
+            {
+                cPos.x = -10.f;
+            }
+        }
     }
 }

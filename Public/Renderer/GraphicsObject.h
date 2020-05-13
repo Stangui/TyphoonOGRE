@@ -3,24 +3,59 @@
 #include "OgreVector3.h"
 #include "OgreQuaternion.h"
 #include "OgreStringVector.h"
+#include "TyphoonCore.h"
+
+#include <OgreColourValue.h>
 
 namespace TyphoonEngine
 {
-#define NUM_GAME_ENTITY_BUFFERS 4
 
     enum MovableObjectType
     {
         MoTypeItem,
-        MoTypeEntity,
+        MoTypeCamera,
+        MoTypeLight,
+        MoTypeParticleSystem,
+        MoTypeDecal,
+        MoTypeManualObject,
+        MoTypeNullEntity,
+        MoTypeMovablePlane,
         NumMovableObjectType
     };
 
     struct MovableObjectDefinition
     {
+        MovableObjectType   moType;
+
+        virtual ~MovableObjectDefinition()
+        {
+        }
+    };
+
+    struct ItemDefinition : MovableObjectDefinition
+    {
         Ogre::String        meshName;
         Ogre::String        resourceGroup;
         Ogre::StringVector  submeshMaterials;
-        MovableObjectType   moType;
+    };
+
+    struct LightDefinition : MovableObjectDefinition
+    {
+        Ogre::ColourValue   DiffuseColour;
+        Ogre::ColourValue   SpecularColour;
+        Ogre::uint32        TypeIdx;
+        bool                bCastsShadows;
+        bool                bSetStatic;
+    };
+
+    struct CameraDefinition : MovableObjectDefinition
+    {
+        Ogre::String        Name;
+        Ogre::Real          FOVy;
+        Ogre::Real          NearClip;
+        Ogre::Real          FarClip;
+        bool                bIsOrthographic;
+        bool                bAutoAspectRatio;
     };
 
     struct ObjectTransform
@@ -55,8 +90,8 @@ namespace TyphoonEngine
         //----------------------------------------
         // Read-only
         //----------------------------------------
-        MovableObjectDefinition const* mMoDefinition;
-        size_t							mTransformBufferIdx;
+        MovableObjectDefinition const*  mMoDefinition;
+        size_t                          mTransformBufferIdx;
 
         GraphicsObject( Ogre::uint32 id, const MovableObjectDefinition* moDefinition, Ogre::SceneMemoryMgrTypes type ) 
             : mId( id )
@@ -66,8 +101,7 @@ namespace TyphoonEngine
             , mMoDefinition( moDefinition )
             , mTransformBufferIdx( 0 )
         {
-            for ( int i = 0; i<NUM_GAME_ENTITY_BUFFERS; ++i )
-                mTransform[ i ] = nullptr;
+            memset(mTransform, 0, NUM_GAME_ENTITY_BUFFERS * sizeof(intptr_t));
         }
 
         inline Ogre::uint32 getId( void ) const

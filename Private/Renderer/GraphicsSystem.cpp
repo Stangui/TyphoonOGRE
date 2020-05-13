@@ -858,43 +858,70 @@ namespace TyphoonEngine
     //-----------------------------------------------------------------------------------
     void GraphicsSystem::GameEntityAdded( const GraphicsObjectManager::CreatedGameEntity* cge )
     {
-        Ogre::SceneNode* sceneNode = mSceneManager->getRootSceneNode( cge->m_gameEntity->mType )->
-            createChildSceneNode( cge->m_gameEntity->mType,
-                cge->m_initialTransform.vPos,
-                cge->m_initialTransform.qRot );
+        Ogre::SceneNode* sceneNode = mSceneManager->getRootSceneNode( cge->m_GameEntity->mType )->
+            createChildSceneNode( cge->m_GameEntity->mType,
+                cge->m_InitialTransform.vPos,
+                cge->m_InitialTransform.qRot );
 
-        sceneNode->setScale( cge->m_initialTransform.vScale );
+        sceneNode->setScale( cge->m_InitialTransform.vScale );
 
-        cge->m_gameEntity->mSceneNode = sceneNode;
+        cge->m_GameEntity->mSceneNode = sceneNode;
 
-        if ( cge->m_gameEntity->mMoDefinition->moType==MoTypeItem )
+        switch ( cge->m_GameEntity->mMoDefinition->moType )
         {
-            Ogre::Item* item = mSceneManager->createItem( cge->m_gameEntity->mMoDefinition->meshName,
-                cge->m_gameEntity->mMoDefinition->resourceGroup,
-                cge->m_gameEntity->mType );
-
-            Ogre::StringVector materialNames = cge->m_gameEntity->mMoDefinition->submeshMaterials;
-            size_t minMaterials = std::min( materialNames.size(), item->getNumSubItems() );
-
-            for ( size_t i = 0; i<minMaterials; ++i )
+        case MoTypeItem:
+        {
+            const ItemDefinition* def = dynamic_cast< const ItemDefinition* >( cge->m_GameEntity->mMoDefinition );
+            if ( def )
             {
-                item->getSubItem( i )->setDatablockOrMaterialName( materialNames[ i ], cge->m_gameEntity->mMoDefinition->resourceGroup );
-            }
+                Ogre::Item* item = mSceneManager->createItem( def->meshName, def->resourceGroup, cge->m_GameEntity->mType );
 
-            cge->m_gameEntity->mMovableObject = item;
+                Ogre::StringVector materialNames = def->submeshMaterials;
+                size_t minMaterials = std::min( materialNames.size(), item->getNumSubItems() );
+
+                for ( size_t i = 0; i<minMaterials; ++i )
+                {
+                    item->getSubItem( i )->setDatablockOrMaterialName( materialNames[ i ], def->resourceGroup );
+                }
+
+                cge->m_GameEntity->mMovableObject = item;
+            }
+        }
+        break;
+        case MoTypeLight:
+        {
+            const LightDefinition* def = dynamic_cast< const LightDefinition* >( cge->m_GameEntity->mMoDefinition );
+            if ( def )
+            {
+                Ogre::Light* item = mSceneManager->createLight();
+                item->setType( static_cast< Ogre::Light::LightTypes >( def->TypeIdx ) );
+                cge->m_GameEntity->mMovableObject = item;
+            }
+        }
+        break;
+        case MoTypeCamera:
+        {
+            const CameraDefinition* def = dynamic_cast< const CameraDefinition* >( cge->m_GameEntity->mMoDefinition );
+            if ( def )
+            {
+                Ogre::Camera* item = mSceneManager->createCamera(def->Name);
+                cge->m_GameEntity->mMovableObject = item;
+            }
+        }
+        break;
         }
 
-        sceneNode->attachObject( cge->m_gameEntity->mMovableObject );
+        sceneNode->attachObject( cge->m_GameEntity->mMovableObject );
 
         //Keep them sorted on how Ogre's internal memory manager assigned them memory,
         //to avoid false cache sharing when we update the nodes concurrently.
         const Ogre::Transform& transform = sceneNode->_getTransform();
         GameEntityVec::iterator itGameEntity = std::lower_bound(
-            mGameEntities[ cge->m_gameEntity->mType ].begin(),
-            mGameEntities[ cge->m_gameEntity->mType ].end(),
+            mGameEntities[ cge->m_GameEntity->mType ].begin(),
+            mGameEntities[ cge->m_GameEntity->mType ].end(),
             &transform.mDerivedTransform[ transform.mIndex ],
             GameEntityCmp() );
-        mGameEntities[ cge->m_gameEntity->mType ].insert( itGameEntity, cge->m_gameEntity );
+        mGameEntities[ cge->m_GameEntity->mType ].insert( itGameEntity, cge->m_GameEntity );
     }
     
     //----------------------------------------------------------------------------------

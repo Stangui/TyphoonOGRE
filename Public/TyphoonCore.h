@@ -1,6 +1,7 @@
 #pragma once
 
 #define SAFE_DELETE(x) if (x) { delete x; x = nullptr; }
+#define NUM_GAME_ENTITY_BUFFERS 4
 
 namespace TyphoonEngine
 {
@@ -10,9 +11,9 @@ namespace TyphoonEngine
     static constexpr int DEFAULT_WINDOW_HEIGHT = 720;
 
     class GraphicsSystem;
-    class LogicSystem;
     class GraphicsObjectManager;
     class GraphicsState;
+    class LogicSystem;
     class LogicState;
     class IBaseState;
 }

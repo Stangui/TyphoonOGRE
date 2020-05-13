@@ -15,8 +15,8 @@ namespace TyphoonEngine
 
         struct CreatedGameEntity
         {
-            GraphicsObject*			m_gameEntity;
-            ObjectTransform m_initialTransform;
+            GraphicsObject* m_GameEntity;
+            ObjectTransform m_InitialTransform;
         };
 
         typedef std::vector<GameEntityVec> GameEntityVecVec;

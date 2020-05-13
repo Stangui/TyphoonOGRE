@@ -11,10 +11,10 @@ namespace TyphoonEngine
 
     class LogicState : public IBaseState
     {
-        float                       mDisplacement;
-        GraphicsObject*             mCubeEntity;
-        MovableObjectDefinition*    mCubeMoDef;
-        LogicSystem*                mLogicSystem;
+        float                                   mDisplacement;
+        std::vector<GraphicsObject*>            mCubeEntities;
+        std::vector<MovableObjectDefinition*>   mCubeMoDefs;
+        LogicSystem*                            mLogicSystem;
 
     public:
 
@@ -23,16 +23,20 @@ namespace TyphoonEngine
 
         void Init() override
         {
-        };
+        }
+        
         void Shutdown() override
         {
-        };
+        }
+        
         virtual void DestroyScene() override
         {
         }
+        
         virtual void FinishFrame() override
         {
         }
+        
         virtual void FinishFrameParallel() override
         {
         }

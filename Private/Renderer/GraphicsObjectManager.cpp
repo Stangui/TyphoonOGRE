@@ -52,13 +52,13 @@ namespace TyphoonEngine
                                                   const Ogre::Quaternion &initialRot,
                                                   const Ogre::Vector3 &initialScale )
     {
-        GraphicsObject*gameEntity = new GraphicsObject( mCurrentId++, moDefinition, type );
+        GraphicsObject* gameEntity = new GraphicsObject( mCurrentId++, moDefinition, type );
 
         CreatedGameEntity cge;
-        cge.m_gameEntity  = gameEntity;
-        cge.m_initialTransform.vPos   = initialPos;
-        cge.m_initialTransform.qRot   = initialRot;
-        cge.m_initialTransform.vScale = initialScale;
+        cge.m_GameEntity  = gameEntity;
+        cge.m_InitialTransform.vPos   = initialPos;
+        cge.m_InitialTransform.qRot   = initialRot;
+        cge.m_InitialTransform.vScale = initialScale;
 
         size_t slot, bufferIdx;
         aquireTransformSlot( slot, bufferIdx );
@@ -67,7 +67,7 @@ namespace TyphoonEngine
         for( int i=0; i<NUM_GAME_ENTITY_BUFFERS; ++i )
         {
             gameEntity->mTransform[i] = mTransformBuffers[bufferIdx] + slot + cNumTransforms * i;
-            memcpy( gameEntity->mTransform[i], &cge.m_initialTransform, sizeof(ObjectTransform) );
+            memcpy( gameEntity->mTransform[i], &cge.m_InitialTransform, sizeof(ObjectTransform) );
         }
 
         mGameEntities[type].push_back( gameEntity );
