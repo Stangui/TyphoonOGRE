@@ -9,7 +9,7 @@ namespace TyphoonEngine
     struct GraphicsObject;
     struct MovableObjectDefinition;
 
-    class AppLogicState : public IBaseState
+    class LogicState : public IBaseState
     {
         float                       mDisplacement;
         GraphicsObject*             mCubeEntity;
@@ -18,8 +18,8 @@ namespace TyphoonEngine
 
     public:
 
-        AppLogicState();
-        virtual ~AppLogicState() override;
+        LogicState();
+        virtual ~LogicState() override;
 
         void Init() override
         {

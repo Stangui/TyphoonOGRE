@@ -8,7 +8,7 @@
 
 namespace TyphoonEngine
 {
-    AppLogicState::AppLogicState()
+    LogicState::LogicState()
         : mDisplacement( 0 )
         , mCubeEntity( 0 )
         , mCubeMoDef( 0 )
@@ -16,12 +16,12 @@ namespace TyphoonEngine
     {
     }
     //-----------------------------------------------------------------------------------
-    AppLogicState::~AppLogicState()
+    LogicState::~LogicState()
     {
         SAFE_DELETE( mCubeMoDef );
     }
     //-----------------------------------------------------------------------------------
-    void AppLogicState::CreateScene( void )
+    void LogicState::CreateScene( void )
     {
         const Ogre::Vector3 origin( 0.0f, 0.0f, 0.0f );
 
@@ -42,7 +42,7 @@ namespace TyphoonEngine
         }
     }
     //-----------------------------------------------------------------------------------
-    void AppLogicState::Update( float timeSinceLast )
+    void LogicState::Update( float timeSinceLast )
     {
         const Ogre::Vector3 origin( -10.0f, 0.0f, 0.0f );
 

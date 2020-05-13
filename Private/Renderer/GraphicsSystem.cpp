@@ -332,6 +332,7 @@ namespace TyphoonEngine
         panel->addChild( mDebugTextShadow );
         panel->addChild( mDebugText );
         mDebugPanel->add2D( panel );
+        mDebugPanel->show();
     }
 
     //-----------------------------------------------------------------------------------
@@ -351,10 +352,11 @@ namespace TyphoonEngine
         finalText += " ms\n";
         finalText += "Avg FPS:\t";
         finalText += Ogre::StringConverter::toString( 1000.0f/frameStats->getAvgTime() );
-
+        
         mDebugText->setCaption( finalText );
         mDebugTextShadow->setCaption( finalText );
     }
+    
     //-----------------------------------------------------------------------------------
     void GraphicsSystem::Shutdown( void )
     {
@@ -389,7 +391,6 @@ namespace TyphoonEngine
     {
         Ogre::WindowEventUtilities::messagePump();
 
-#if OGRE_USE_SDL2
         SDL_Event evt;
         while ( SDL_PollEvent( &evt ) )
         {
@@ -407,7 +408,6 @@ namespace TyphoonEngine
 
             mInputHandler->_handleSdlEvents( evt );
         }
-#endif
 
         BaseSystem::Update( timeSinceLast );
 

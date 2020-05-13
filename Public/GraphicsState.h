@@ -5,31 +5,48 @@
 
 namespace TyphoonEngine
 {
-	class GraphicsSystem;
+    class GraphicsSystem;
 
-	class GraphicsGameState : public IBaseState
-	{
-	
-	private:
+    class GraphicsState : public IBaseState
+    {
 
-		GraphicsSystem* m_GraphicsSystem;
+    private:
 
-	public:
+        GraphicsSystem* m_GraphicsSystem;
 
-		GraphicsGameState();
-		virtual ~GraphicsGameState() override {};
+    public:
 
-		// IBaseState interface
-		virtual void Init() override {}
-		virtual void Shutdown() override {}
-		virtual void CreateScene() override;
-		virtual void DestroyScene() override {}
-		virtual void FinishFrame() override {}
-		virtual void FinishFrameParallel() override {}
-		virtual void Update( float timeSinceLast ) override;
+        GraphicsState();
+        virtual ~GraphicsState() override
+        {
+        };
 
-		inline virtual void SetGraphicSystem( GraphicsSystem* sys ) { m_GraphicsSystem = sys; }
-		
-		virtual void keyReleased( const SDL_KeyboardEvent &arg );
-	};
+        // IBaseState interface
+        virtual void Init() override
+        {
+        }
+        virtual void Shutdown() override
+        {
+        }
+        virtual void CreateScene() override
+        {
+        }
+        virtual void DestroyScene() override
+        {
+        }
+        virtual void FinishFrame() override
+        {
+        }
+        virtual void FinishFrameParallel() override
+        {
+        }
+        virtual void Update( float timeSinceLast ) override;
+
+        inline virtual void SetGraphicSystem( GraphicsSystem* sys )
+        {
+            m_GraphicsSystem = sys;
+        }
+
+        virtual void keyReleased( const SDL_KeyboardEvent& arg );
+    };
 }

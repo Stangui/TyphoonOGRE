@@ -35,9 +35,9 @@ namespace TyphoonEngine
     private:
 
         GraphicsObjectManager*  m_GameEntityManager;
-        GraphicsGameState*      m_GraphicsGameState;
+        GraphicsState*          m_GraphicsState;
         GraphicsSystem*         m_GraphicsSystem;
-        AppLogicState*          m_LogicGameState;
+        LogicState*             m_LogicState;
         LogicSystem*            m_LogicSystem;
         Ogre::Barrier*          m_Barriers;
         ThreadData              m_ThreadData;

@@ -48,20 +48,21 @@ namespace TyphoonEngine
         const Ogre::RenderWindow* renderWindow = GraphicsSystem->GetRenderWindow();
         Ogre::Timer timer;
         Ogre::uint64 startTime = timer.getMicroseconds();
-        double timeSinceLast = TyphoonEngine::RENDER_UPDATE_TIME;
-
+        double timeSinceLast = 0.0;
+ 
         while ( !GraphicsSystem->GetQuit() )
         {
             GraphicsSystem->BeginFrameParallel();
-            GraphicsSystem->Update( static_cast< float >( timeSinceLast ) );
+            GraphicsSystem->Update( static_cast<float>(timeSinceLast) );
             GraphicsSystem->FinishFrameParallel();
+            GraphicsSystem->FinishFrame();
 
             if ( !renderWindow->isVisible() )
             {
                 //Don't burn CPU cycles unnecessary when we're minimized.
                 Ogre::Threads::Sleep( 500 );
             }
-
+            
             Ogre::uint64 endTime = timer.getMicroseconds();
             timeSinceLast = ( endTime-startTime )/1000000.0;
             timeSinceLast = std::min( 1.0, timeSinceLast ); //Prevent from going haywire.
@@ -134,8 +135,8 @@ namespace TyphoonEngine
 
         const Ogre::RenderWindow* renderWindow = GraphicsSystem->GetRenderWindow();
         Ogre::Timer timer;
-        TyphoonEngine::YieldTimer yieldTimer( &timer );
         Ogre::uint64 startTime = timer.getMicroseconds();
+        YieldTimer yieldTimer(&timer);
 
         while ( !GraphicsSystem->GetQuit() )
         {
@@ -150,7 +151,6 @@ namespace TyphoonEngine
                 Ogre::Threads::Sleep( 500 );
             }
 
-            //YieldTimer will wait until the current time is greater than startTime + cFrametime
             startTime = yieldTimer.yield( TyphoonEngine::LOGIC_UPDATE_TIME, startTime );
         }
 
@@ -168,9 +168,9 @@ namespace TyphoonEngine
     //---------------------------------------------------------------------
     TyphoonApplication::TyphoonApplication()
         : m_GameEntityManager( nullptr )
-        , m_GraphicsGameState( nullptr )
+        , m_GraphicsState( nullptr )
         , m_GraphicsSystem( nullptr )
-        , m_LogicGameState( nullptr )
+        , m_LogicState( nullptr )
         , m_LogicSystem( nullptr )
         , m_Barriers( nullptr )
     {
@@ -179,17 +179,17 @@ namespace TyphoonEngine
     //---------------------------------------------------------------------
     void TyphoonApplication::Run()
     {
-        m_GraphicsGameState = new GraphicsGameState();
-        m_GraphicsSystem = new GraphicsSystem( m_GraphicsGameState );
-        m_LogicGameState = new AppLogicState();
-        m_LogicSystem = new LogicSystem( m_LogicGameState );
+        m_GraphicsState = new GraphicsState();
+        m_GraphicsSystem = new GraphicsSystem( m_GraphicsState, Ogre::ColourValue(0.32f, 0.54f, 0.9f, 1.f) );
+        m_LogicState = new LogicState();
+        m_LogicSystem = new LogicSystem( m_LogicState );
         m_Barriers = new Ogre::Barrier( 2 );
         m_GameEntityManager = new GraphicsObjectManager( m_GraphicsSystem, m_LogicSystem );
 
-        m_GraphicsGameState->SetGraphicSystem( m_GraphicsSystem );
+        m_GraphicsState->SetGraphicSystem( m_GraphicsSystem );
         m_LogicSystem->SetGraphicSystem( m_GraphicsSystem );
         m_GraphicsSystem->SetLogicSystem( m_LogicSystem );
-        m_LogicGameState->SetLogicSystem( m_LogicSystem );
+        m_LogicState->SetLogicSystem( m_LogicSystem );
 
         m_ThreadData.m_GraphicsSystem = m_GraphicsSystem;
         m_ThreadData.m_LogicSystem = m_LogicSystem;
@@ -205,11 +205,10 @@ namespace TyphoonEngine
         SAFE_DELETE( m_GameEntityManager );
         SAFE_DELETE( m_Barriers );
         SAFE_DELETE( m_LogicSystem );
-        SAFE_DELETE( m_LogicGameState );
+        SAFE_DELETE( m_LogicState );
         SAFE_DELETE( m_GraphicsSystem );
-        SAFE_DELETE( m_GraphicsGameState );
+        SAFE_DELETE( m_GraphicsState );
     }
-
 }
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32

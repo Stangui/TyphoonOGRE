@@ -9,25 +9,20 @@
 namespace TyphoonEngine
 {
 
-	GraphicsGameState::GraphicsGameState() : m_GraphicsSystem( nullptr )
+	//-----------------------------------------------------------------------------------
+	GraphicsState::GraphicsState() : m_GraphicsSystem( nullptr )
 	{
 	}
 
-    //-----------------------------------------------------------------------------------
-    void GraphicsGameState::CreateScene()
-    {
-    }
-
-
 	//-----------------------------------------------------------------------------------
-	void GraphicsGameState::Update( float timeSinceLast )
+	void GraphicsState::Update( float timeSinceLast )
 	{
 		float weight = std::min( 1.0f, static_cast<float>(m_GraphicsSystem->GetAccumTimeSinceLastLogicFrame() / TyphoonEngine::LOGIC_UPDATE_TIME ) );
 		m_GraphicsSystem->UpdateGameEntities( m_GraphicsSystem->GetGameEntities( Ogre::SCENE_DYNAMIC ), weight );
 	}
 
 	//-----------------------------------------------------------------------------------
-	void GraphicsGameState::keyReleased( const SDL_KeyboardEvent& arg )
+	void GraphicsState::keyReleased( const SDL_KeyboardEvent& arg )
 	{
 		if ( arg.keysym.scancode == SDL_SCANCODE_ESCAPE )
 		{
