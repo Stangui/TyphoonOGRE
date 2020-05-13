@@ -1,19 +1,17 @@
 #pragma once 
 
-#include "IBaseSystem.h"
+#include "BaseSystem.h"
 #include "OgrePrerequisites.h"
 
 namespace TyphoonEngine
 {
     class GraphicsObjectManager;
-    class IBaseState;
 
-    class LogicSystem : public IBaseSystem
+    class LogicSystem : public BaseSystem
     {
     protected:
 
-        IBaseSystem* m_GraphicsSystem;
-        IBaseState* m_LogicState;
+        BaseSystem* m_GraphicsSystem;
         GraphicsObjectManager* m_GameEntityManager;
         Ogre::uint32 m_CurrentTransformIdx;
         std::deque<Ogre::uint32> m_AvailableTransformIdx;
@@ -28,16 +26,9 @@ namespace TyphoonEngine
 
 
         // IBaseSystem interface
-        virtual void Init( void ) override;
-        virtual void CreateScene( void ) override;
-        virtual void BeginFrameParallel( void ) override;
         virtual void FinishFrameParallel( void ) override;
-        virtual void FinishFrame( void ) override;
-        virtual void Update( float deltaTime ) override;
-        virtual void DestroyScene( void ) override;
-        virtual void Shutdown( void ) override;
-
-        inline void SetGraphicSystem( IBaseSystem* GraphicsSystem )
+        
+        inline void SetGraphicSystem( BaseSystem* GraphicsSystem )
         {
             m_GraphicsSystem = GraphicsSystem;
         }

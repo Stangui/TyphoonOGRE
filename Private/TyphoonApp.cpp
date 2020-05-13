@@ -177,7 +177,7 @@ namespace TyphoonEngine
     }
 
     //---------------------------------------------------------------------
-    bool TyphoonApplication::Init()
+    void TyphoonApplication::Run()
     {
         m_GraphicsGameState = new GraphicsGameState();
         m_GraphicsSystem = new GraphicsSystem( m_GraphicsGameState );
@@ -194,33 +194,20 @@ namespace TyphoonEngine
         m_ThreadData.m_GraphicsSystem = m_GraphicsSystem;
         m_ThreadData.m_LogicSystem = m_LogicSystem;
         m_ThreadData.m_Barriers = m_Barriers;
-        return true;
-    }
 
-    //---------------------------------------------------------------------
-    void TyphoonApplication::Shutdown()
-    {
+        Ogre::ThreadHandlePtr threadHandles[ ] =
+        {
+            Ogre::Threads::CreateThread( THREAD_GET( RenderThread ), 0, &m_ThreadData ),
+            Ogre::Threads::CreateThread( THREAD_GET( LogicThread ), 1, &m_ThreadData )
+        };
+        Ogre::Threads::WaitForThreads( 2, threadHandles );        
+
         SAFE_DELETE( m_GameEntityManager );
         SAFE_DELETE( m_Barriers );
         SAFE_DELETE( m_LogicSystem );
         SAFE_DELETE( m_LogicGameState );
         SAFE_DELETE( m_GraphicsSystem );
         SAFE_DELETE( m_GraphicsGameState );
-    }
-
-    //---------------------------------------------------------------------
-    void TyphoonApplication::Run()
-    {
-        if ( Init() )
-        {
-            Ogre::ThreadHandlePtr threadHandles[ ] =
-            {
-                Ogre::Threads::CreateThread( THREAD_GET( RenderThread ), 0, &m_ThreadData ),
-                Ogre::Threads::CreateThread( THREAD_GET( LogicThread ), 1, &m_ThreadData )
-            };
-            Ogre::Threads::WaitForThreads( 2, threadHandles );
-        }
-        Shutdown();
     }
 
 }

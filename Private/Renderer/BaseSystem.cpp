@@ -1,9 +1,9 @@
-#include "IBaseSystem.h"
-#include "IGameState.h"
+#include "BaseSystem.h"
+#include "IBaseState.h"
 
 namespace TyphoonEngine
 {
-    BaseSystem::BaseSystem( IGameState* InitialState ) 
+    BaseSystem::BaseSystem( IBaseState* InitialState ) 
         : m_CurrentState( InitialState )
     {
     }

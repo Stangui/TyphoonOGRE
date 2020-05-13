@@ -30,9 +30,6 @@ namespace TyphoonEngine
 
         TyphoonApplication();
         virtual ~TyphoonApplication() = default;
-
-        virtual bool Init();
-        virtual void Shutdown();
         virtual void Run();
 
     private:

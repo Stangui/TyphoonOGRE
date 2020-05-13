@@ -4,30 +4,11 @@
 #include "SdlInputHandler.h"
 #include "GraphicsObjectManager.h"
 
-#include "OgreRoot.h"
-#include "OgreException.h"
-#include "OgreConfigFile.h"
-
-#include "OgreRenderWindow.h"
-#include "OgreCamera.h"
-
-#include "Unlit/OgreHlmsUnlit.h"
-#include "PBS/OgreHlmsPbs.h"
-#include "OgreHlmsManager.h"
-#include "OgreArchiveManager.h"
-
-#include "Compositor/OgreCompositorManager2.h"
-
-#include "Overlay/OgreOverlaySystem.h"
-
-#if OGRE_USE_SDL2
-    #include <SDL_syswm.h>
-#endif
-
 namespace TyphoonEngine
 {
     LogicSystem::LogicSystem( IBaseState* InitialState ) 
-        : m_GraphicsSystem( nullptr )
+        : BaseSystem( InitialState )
+        , m_GraphicsSystem( nullptr )
         , m_GameEntityManager( nullptr )
         , m_CurrentTransformIdx( 1 )
     {
@@ -40,65 +21,6 @@ namespace TyphoonEngine
     //-----------------------------------------------------------------------------------
     LogicSystem::~LogicSystem()
     {
-    }
-
-    //-----------------------------------------------------------------------------------
-    void LogicSystem::Init( void )
-    {
-        if ( m_LogicState )
-        {
-            m_LogicState->Init();
-        }
-    }
-    
-    //-----------------------------------------------------------------------------------
-    void LogicSystem::CreateScene( void )
-    {
-        if ( m_LogicState )
-        {
-            m_LogicState->CreateScene();
-        }
-    }
-    
-    //-----------------------------------------------------------------------------------
-    void LogicSystem::BeginFrameParallel( void )
-    {
-    }
-    
-    //-----------------------------------------------------------------------------------
-    void LogicSystem::FinishFrame( void )
-    {
-        if ( m_LogicState )
-        {
-            m_LogicState->FinishFrame();
-        }
-    }
-    
-    //-----------------------------------------------------------------------------------
-    void LogicSystem::Update( float deltaTime )
-    {
-        if ( m_LogicState )
-        {
-            m_LogicState->Update( deltaTime );
-        }
-    }
-    
-    //-----------------------------------------------------------------------------------
-    void LogicSystem::DestroyScene( void )
-    {
-        if ( m_LogicState )
-        {
-            m_LogicState->DestroyScene();
-        }
-    }
-    
-    //-----------------------------------------------------------------------------------
-    void LogicSystem::Shutdown( void )
-    {
-        if ( m_LogicState )
-        {
-            m_LogicState->Shutdown();
-        }
     }
 
     //-----------------------------------------------------------------------------------
@@ -130,10 +52,7 @@ namespace TyphoonEngine
             this->QueueSendMessage( m_GraphicsSystem, Mq::LOGICFRAME_FINISHED, idxToSend );
         }
 
-        if ( m_LogicState )
-        {
-            m_LogicState->FinishFrameParallel();
-        }
+        BaseSystem::FinishFrameParallel();
     }
     
     //-----------------------------------------------------------------------------------

@@ -58,7 +58,8 @@ namespace TyphoonEngine
     static const char* CONFIGS_FOLDER = ".\\Configs\\";
   
     GraphicsSystem::GraphicsSystem( IBaseState* InitialState, Ogre::ColourValue backgroundColour )
-        : mLogicSystem( nullptr )
+        : BaseSystem( InitialState )
+        , mLogicSystem( nullptr )
         , mSdlWindow( 0 )
         , mInputHandler( 0 )
         , mRoot( nullptr )
@@ -281,12 +282,9 @@ namespace TyphoonEngine
         CreateCamera();
         mWorkspace = SetupCompositor();
 
-        mInputHandler = new SdlInputHandler( mSdlWindow, mGraphicsState, mGraphicsState, mGraphicsState );
+        mInputHandler = new SdlInputHandler( mSdlWindow, m_CurrentState, m_CurrentState, m_CurrentState );
 
-        if ( mGraphicsState )
-        {
-            mGraphicsState->Init();
-        }
+        BaseSystem::Init();
 
 #if OGRE_PROFILING
         Ogre::Profiler::getSingleton().setEnabled( true );
@@ -357,58 +355,10 @@ namespace TyphoonEngine
         mDebugText->setCaption( finalText );
         mDebugTextShadow->setCaption( finalText );
     }
-
-    //-----------------------------------------------------------------------------------
-    void GraphicsSystem::CreateScene( void )
-    {
-        if ( mGraphicsState )
-        {
-            mGraphicsState->CreateScene();
-        }
-    }
-
-    //-----------------------------------------------------------------------------------
-    void GraphicsSystem::BeginFrameParallel( void )
-    {
-        this->ProcessIncomingMessages();
-    }
-
-    //-----------------------------------------------------------------------------------
-    void GraphicsSystem::FinishFrameParallel( void )
-    {
-        if ( mGraphicsState )
-        {
-            mGraphicsState->FinishFrameParallel();
-        }
-
-        this->FlushQueuedMessages();
-    }
-
-    //-----------------------------------------------------------------------------------
-    void GraphicsSystem::FinishFrame( void )
-    {
-        if ( mGraphicsState )
-        {
-            mGraphicsState->FinishFrame();
-        }
-    }
-
-    //-----------------------------------------------------------------------------------
-    void GraphicsSystem::DestroyScene( void )
-    {
-        if ( mGraphicsState )
-        {
-            mGraphicsState->DestroyScene();
-        }
-    }
-
     //-----------------------------------------------------------------------------------
     void GraphicsSystem::Shutdown( void )
     {
-        if ( mGraphicsState )
-        {
-            mGraphicsState->Shutdown();
-        }
+        BaseSystem::Shutdown();
 
         SaveHlmsDiskCache();
 
@@ -459,10 +409,7 @@ namespace TyphoonEngine
         }
 #endif
 
-        if ( mGraphicsState )
-        {
-            mGraphicsState->Update( timeSinceLast );
-        }
+        BaseSystem::Update( timeSinceLast );
 
         if ( bShowDebug )
         {

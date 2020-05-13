@@ -1,8 +1,7 @@
 #pragma once 
 
-#include "IBaseSystem.h"
+#include "BaseSystem.h"
 #include "GraphicsObjectManager.h"
-#include "System/StaticPluginLoader.h"
 #include "OgrePrerequisites.h"
 #include "OgreColourValue.h"
 #include "Overlay/OgreOverlayPrerequisites.h"
@@ -17,14 +16,12 @@
 namespace TyphoonEngine
 {
     class SdlInputHandler;
-    class IBaseState;
 
-    class GraphicsSystem : public IBaseSystem, public Ogre::UniformScalableTask
+    class GraphicsSystem : public BaseSystem, public Ogre::UniformScalableTask
     {
     protected:
         
-        IBaseSystem*                mLogicSystem;
-        IBaseState*                 mGraphicsState;
+        BaseSystem*                mLogicSystem;
         SDL_Window*                 mSdlWindow;
         SdlInputHandler*            mInputHandler;
         Ogre::Root*                 mRoot;
@@ -95,19 +92,14 @@ namespace TyphoonEngine
         GraphicsSystem( IBaseState* GameState, Ogre::ColourValue backgroundColour = Ogre::ColourValue( 0.2f, 0.4f, 0.6f ) );
         virtual ~GraphicsSystem() override;
 
-        inline void SetLogicSystem( IBaseSystem* logicSystem )
+        inline void SetLogicSystem( BaseSystem* logicSystem )
         {
             mLogicSystem = logicSystem;
         }
 
         // IBaseSystem interface
         virtual void Init( void ) override;
-        virtual void CreateScene( void ) override;
-        virtual void BeginFrameParallel( void ) override;
-        virtual void FinishFrameParallel( void ) override;
-        virtual void FinishFrame( void ) override;
-        virtual void Update( float deltaTime ) override;
-        virtual void DestroyScene( void ) override;
+        virtual void Update( float timeSinceLast ) override;
         virtual void Shutdown( void ) override;
 
         /** Updates the SceneNodes of all the game entities in the container,
